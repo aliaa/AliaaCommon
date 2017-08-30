@@ -105,7 +105,7 @@ namespace AliaaCommon
 
             return db;
         }
-
+        
         static readonly Type mongoIndexAttrType = typeof(MongoIndexAttribute);
 
         public static IMongoCollection<T> Collection
@@ -143,7 +143,7 @@ namespace AliaaCommon
 
         public static T FindById(ObjectId id)
         {
-            return Collection.Find(Builders<T>.Filter.Eq(t => t.Id, id)).FirstOrDefault();
+            return Collection.Find(t => t.Id == id).FirstOrDefault();
         }
 
         private static readonly Type collSaveType = typeof(CollectionSaveAttribute);
@@ -172,7 +172,7 @@ namespace AliaaCommon
             }
             else
             {
-                Collection.ReplaceOne(Builders<T>.Filter.Eq(t => t.Id, entity.Id), entity, new UpdateOptions { IsUpsert = true });
+                Collection.ReplaceOne(t => t.Id == entity.Id, entity, new UpdateOptions { IsUpsert = true });
                 activityType = ActivityType.Update;
             }
             if (writeLog)
@@ -226,19 +226,38 @@ namespace AliaaCommon
 
         public static void Remove(T obj)
         {
-            Collection.DeleteOne(Builders<T>.Filter.Eq(t => t.Id, obj.Id));
+            Collection.DeleteOne(t => t.Id == obj.Id);
 
-            bool writeLog = true;
+            bool writeLog = writeLogDefaultValue;
             CollectionSaveAttribute attr = (CollectionSaveAttribute)Attribute.GetCustomAttribute(typeof(T), collSaveType);
             if (attr != null)
                 writeLog = attr.WriteLog;
             if (writeLog)
                 DB<UserActivity>.Save(new UserActivity(ActivityType.Delete, GetCollectionName(typeof(T)), obj));
         }
+        
+        public static void Remove(ObjectId Id)
+        {
+            bool writeLog = writeLogDefaultValue;
+            CollectionSaveAttribute attr = (CollectionSaveAttribute)Attribute.GetCustomAttribute(typeof(T), collSaveType);
+            if (attr != null)
+                writeLog = attr.WriteLog;
+            if(writeLog)
+            {
+                T obj = FindById(Id);
+                DB<UserActivity>.Save(new UserActivity(ActivityType.Delete, GetCollectionName(typeof(T)), obj));
+            }
+            Collection.DeleteOne(t => t.Id == Id);
+        }
 
-        public static List<T> GetAll()
+        public static List<T> GetAllAsList()
         {
             return Collection.Find(FilterDefinition<T>.Empty).ToList();
+        }
+
+        public static IEnumerable<T> GetAllAsEnumerable()
+        {
+            return Collection.Find(FilterDefinition<T>.Empty).ToEnumerable();
         }
 
         public static Dictionary<ObjectId, T> GetAllAsDictionary()
