@@ -63,36 +63,32 @@ namespace AliaaCommon
 
     public static class DB<T> where T : MongoEntity
     {
-        //static readonly string DB_NAME = ConfigurationManager.AppSettings["DBName"];
-        //static readonly string DB_USERNAME = ConfigurationManager.AppSettings["DBUsername"];
-        //static readonly string DB_PASSWORD = ConfigurationManager.AppSettings["DBPassword"];
-        //static readonly string DB_HOST = ConfigurationManager.AppSettings["DBHost"];
-        //static readonly string CONN_STRING = "mongodb://" + DB_USERNAME + ":" + DB_PASSWORD + "@" + DB_HOST + "/" + DB_NAME;
+        private static readonly string CONN_STRING = ConfigurationManager.AppSettings["MongoConnString"];
+        private static readonly string DB_NAME = ConfigurationManager.AppSettings["DBName"];
 
-        private static string dbName, connstring;
-        private static bool writeLogDefaultValue, unifyCharsDefaultValue, unifyNumsDefaultValue;
+        public static bool writeLogDefaultValue = true, unifyCharsDefaultValue = true, unifyNumsDefaultValue;
 
         private static IMongoDatabase db = null;
         private static Dictionary<Type, object> Collections = new Dictionary<Type, object>();
 
-        public static void Initialize(string dbName, string username, string password, bool includeDbNameInConnString, string host = "localhost", int port = 27017,
-            bool writeLogDefaultValue = true, bool unifyCharsDefaultValue = true, bool unifyNumsDefaultValue = false)
-        {
-            DB<T>.dbName = dbName;
-            StringBuilder sb = new StringBuilder("mongodb://");
-            if (username != null && password != null)
-                sb.Append(username + ":" + password + "@");
-            sb.Append(host);
-            if (port != 27017)
-                sb.Append(":").Append(port);
-            if (includeDbNameInConnString)
-                sb.Append("/").Append(dbName);
-            connstring = sb.ToString();
+        //public static void Initialize(string dbName, string username, string password, bool includeDbNameInConnString, string host = "localhost", int port = 27017,
+        //    bool writeLogDefaultValue = true, bool unifyCharsDefaultValue = true, bool unifyNumsDefaultValue = false)
+        //{
+        //    DB<T>.dbName = dbName;
+        //    StringBuilder sb = new StringBuilder("mongodb://");
+        //    if (username != null && password != null)
+        //        sb.Append(username + ":" + password + "@");
+        //    sb.Append(host);
+        //    if (port != 27017)
+        //        sb.Append(":").Append(port);
+        //    if (includeDbNameInConnString)
+        //        sb.Append("/").Append(dbName);
+        //    connstring = sb.ToString();
 
-            DB<T>.writeLogDefaultValue = writeLogDefaultValue;
-            DB<T>.unifyCharsDefaultValue = unifyCharsDefaultValue;
-            DB<T>.unifyNumsDefaultValue = unifyNumsDefaultValue;
-        }
+        //    DB<T>.writeLogDefaultValue = writeLogDefaultValue;
+        //    DB<T>.unifyCharsDefaultValue = unifyCharsDefaultValue;
+        //    DB<T>.unifyNumsDefaultValue = unifyNumsDefaultValue;
+        //}
 
         private static IMongoDatabase GetDatabase()
         {
@@ -100,8 +96,8 @@ namespace AliaaCommon
                 return db;
             //MongoClientSettings settings = new MongoClientSettings();
             //settings.Server = new MongoServerAddress("172.26.2.15");
-            MongoClient client = new MongoClient(connstring);
-            db = client.GetDatabase(dbName);
+            MongoClient client = new MongoClient(CONN_STRING);
+            db = client.GetDatabase(DB_NAME);
 
             ConventionRegistry.Register(
                 nameof(DictionaryRepresentationConvention),
