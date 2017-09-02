@@ -8,6 +8,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Net.NetworkInformation;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -237,6 +238,51 @@ namespace AliaaCommon
                 case 12: return "اسفند";
                 default: return null;
             }
+        }
+
+        public static byte[] XorBytes(byte[] b1, byte[] b2)
+        {
+            int min = Math.Min(b1.Length, b2.Length);
+            byte[] result = new byte[min];
+            for (int i = 0; i < min; i++)
+                result[i] = (byte)(b1[i] ^ b2[i]);
+            return result;
+        }
+
+        private static MD5 MD5Computer = MD5.Create();
+
+        public static byte[] GetMd5(byte[] b)
+        {
+            return MD5Computer.ComputeHash(b);
+        }
+
+        public static bool ArraysEqual(byte[] b1, byte[] b2)
+        {
+            if (b1 == null || b2 == null || b1.Length != b2.Length)
+                return false;
+
+            for (int i = 0; i < b1.Length; i++)
+                if (b1[i] != b2[i])
+                    return false;
+            return true;
+        }
+
+
+        public static string GetDatePersianString(long time, bool isLinuxEpoch, bool alsoTime)
+        {
+            DateTime dt;
+            if (isLinuxEpoch)
+            {
+                dt = new DateTime(1970, 1, 1, 0, 0, 0);
+                dt = dt.AddMilliseconds(time);
+            }
+            else
+                dt = new DateTime(time);
+
+            PersianDate pd = new PersianDate(dt);
+            if (alsoTime)
+                return pd.ToString();
+            return pd.ToString("yyyy/MM/dd");
         }
     }
 }
