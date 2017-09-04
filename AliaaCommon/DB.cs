@@ -71,33 +71,23 @@ namespace AliaaCommon
         private static IMongoDatabase db = null;
         private static Dictionary<Type, object> Collections = new Dictionary<Type, object>();
 
-        //public static void Initialize(string dbName, string username, string password, bool includeDbNameInConnString, string host = "localhost", int port = 27017,
-        //    bool writeLogDefaultValue = true, bool unifyCharsDefaultValue = true, bool unifyNumsDefaultValue = false)
-        //{
-        //    DB<T>.dbName = dbName;
-        //    StringBuilder sb = new StringBuilder("mongodb://");
-        //    if (username != null && password != null)
-        //        sb.Append(username + ":" + password + "@");
-        //    sb.Append(host);
-        //    if (port != 27017)
-        //        sb.Append(":").Append(port);
-        //    if (includeDbNameInConnString)
-        //        sb.Append("/").Append(dbName);
-        //    connstring = sb.ToString();
+        /// <summary>
+        /// Gets DataBase object with values of written in App.config or Web.config for connection string ("MongoConnString") and database name ("DBName")
+        /// </summary>
+        /// <returns></returns>
+        public static IMongoDatabase GetDatabase()
+        {
+            return GetDatabase(CONN_STRING, DB_NAME);
+        }
 
-        //    DB<T>.writeLogDefaultValue = writeLogDefaultValue;
-        //    DB<T>.unifyCharsDefaultValue = unifyCharsDefaultValue;
-        //    DB<T>.unifyNumsDefaultValue = unifyNumsDefaultValue;
-        //}
-
-        private static IMongoDatabase GetDatabase()
+        public static IMongoDatabase GetDatabase(string connString, string dbName)
         {
             if (db != null)
                 return db;
             //MongoClientSettings settings = new MongoClientSettings();
             //settings.Server = new MongoServerAddress("172.26.2.15");
-            MongoClient client = new MongoClient(CONN_STRING);
-            db = client.GetDatabase(DB_NAME);
+            MongoClient client = new MongoClient(connString);
+            db = client.GetDatabase(dbName);
 
             ConventionRegistry.Register(
                 nameof(DictionaryRepresentationConvention),
@@ -131,6 +121,29 @@ namespace AliaaCommon
                 catch { }
                 return collection;
             }
+        }
+
+        public static IMongoCollection<T> GetCollection(string collectionName)
+        {
+            return GetCollection(CONN_STRING, DB_NAME, collectionName);
+        }
+
+        public static IMongoCollection<T> GetCollection(string connString, string dbName, string collectionName)
+        {
+            Type ttype = typeof(T);
+            IMongoCollection<T> collection = GetDatabase(connString, dbName).GetCollection<T>(collectionName);
+            foreach (PropertyInfo prop in ttype.GetProperties())
+            {
+                MongoIndexAttribute attr = (MongoIndexAttribute)Attribute.GetCustomAttribute(prop, mongoIndexAttrType);
+                if (attr != null)
+                    collection.Indexes.CreateOne(Builders<T>.IndexKeys.Ascending(prop.Name));
+            }
+            try
+            {
+                Collections.Add(ttype, collection);
+            }
+            catch { }
+            return collection;
         }
 
         private static string GetCollectionName(Type ttype)
