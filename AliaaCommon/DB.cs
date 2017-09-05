@@ -47,14 +47,17 @@ namespace AliaaCommon
         public bool SetIndex { get; set; } = true;
         public bool Unique { get; set; }
         public bool Ascending { get; set; }
+        public bool Sparse { get; set; }
 
         public MongoIndexAttribute()
         { }
 
-        public MongoIndexAttribute(bool SetIndex, bool Unique = false)
+        public MongoIndexAttribute(bool SetIndex, bool Unique = false, bool Ascending = true, bool Sparse = false)
         {
             this.SetIndex = SetIndex;
             this.Unique = Unique;
+            this.Ascending = Ascending;
+            this.Sparse = Sparse;
         }
     }
 
@@ -111,12 +114,7 @@ namespace AliaaCommon
 
                 string collectionName = GetCollectionName(ttype);
                 IMongoCollection<T> collection = GetDatabase().GetCollection<T>(collectionName);
-                foreach (PropertyInfo prop in ttype.GetProperties())
-                {
-                    MongoIndexAttribute attr = (MongoIndexAttribute)Attribute.GetCustomAttribute(prop, mongoIndexAttrType);
-                    if (attr != null)
-                        collection.Indexes.CreateOne(Builders<T>.IndexKeys.Ascending(prop.Name));
-                }
+                SetIndexes(collection);
                 try
                 {
                     Collections.Add(ttype, collection);
@@ -133,17 +131,11 @@ namespace AliaaCommon
 
         public static IMongoCollection<T> GetCollection(string connString, string dbName, string collectionName)
         {
-            Type ttype = typeof(T);
             IMongoCollection<T> collection = GetDatabase(connString, dbName).GetCollection<T>(collectionName);
-            foreach (PropertyInfo prop in ttype.GetProperties())
-            {
-                MongoIndexAttribute attr = (MongoIndexAttribute)Attribute.GetCustomAttribute(prop, mongoIndexAttrType);
-                if (attr != null)
-                    collection.Indexes.CreateOne(Builders<T>.IndexKeys.Ascending(prop.Name));
-            }
+            SetIndexes(collection);
             try
             {
-                Collections.Add(ttype, collection);
+                Collections.Add(typeof(T), collection);
             }
             catch { }
             return collection;
@@ -155,6 +147,23 @@ namespace AliaaCommon
             if (attr != null)
                 return attr.CollectionName;
             return ttype.Name;
+        }
+
+        private static async void SetIndexes(IMongoCollection<T> collection)
+        {
+            foreach (PropertyInfo prop in typeof(T).GetProperties())
+            {
+                MongoIndexAttribute attr = (MongoIndexAttribute)Attribute.GetCustomAttribute(prop, mongoIndexAttrType);
+                if (attr != null)
+                {
+                    IndexKeysDefinition<T> index;
+                    if (attr.Ascending)
+                        index = Builders<T>.IndexKeys.Ascending(prop.Name);
+                    else
+                        index = Builders<T>.IndexKeys.Descending(prop.Name);
+                    await collection.Indexes.CreateOneAsync(index, new CreateIndexOptions { Unique = attr.Unique, Sparse = attr.Sparse });
+                }
+            }
         }
 
         public static T FindById(ObjectId id)
