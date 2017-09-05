@@ -46,7 +46,7 @@ namespace AliaaCommon
     {
         public bool SetIndex { get; set; } = true;
         public bool Unique { get; set; }
-        public bool Ascending { get; set; }
+        public bool Ascending { get; set; } = true;
         public bool Sparse { get; set; }
 
         public MongoIndexAttribute()
@@ -149,7 +149,7 @@ namespace AliaaCommon
             return ttype.Name;
         }
 
-        private static async void SetIndexes(IMongoCollection<T> collection)
+        private static void SetIndexes(IMongoCollection<T> collection)
         {
             foreach (PropertyInfo prop in typeof(T).GetProperties())
             {
@@ -161,7 +161,7 @@ namespace AliaaCommon
                         index = Builders<T>.IndexKeys.Ascending(prop.Name);
                     else
                         index = Builders<T>.IndexKeys.Descending(prop.Name);
-                    await collection.Indexes.CreateOneAsync(index, new CreateIndexOptions { Unique = attr.Unique, Sparse = attr.Sparse });
+                    collection.Indexes.CreateOne(index, new CreateIndexOptions { Unique = attr.Unique, Sparse = attr.Sparse });
                 }
             }
         }
