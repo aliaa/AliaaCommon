@@ -45,13 +45,16 @@ namespace AliaaCommon
     public class MongoIndexAttribute : Attribute
     {
         public bool SetIndex { get; set; } = true;
+        public bool Unique { get; set; }
+        public bool Ascending { get; set; }
 
         public MongoIndexAttribute()
         { }
 
-        public MongoIndexAttribute(bool SetIndex)
+        public MongoIndexAttribute(bool SetIndex, bool Unique = false)
         {
             this.SetIndex = SetIndex;
+            this.Unique = Unique;
         }
     }
 
