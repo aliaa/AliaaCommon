@@ -24,7 +24,7 @@ namespace AliaaCommon
             "doc", "docx", "pdf", "ppt", "pptx", "xls", "xlsx", "txt", "vso", "accdb"
         };
 
-        public static bool isFileUploadAcceptable(string mimeType, string fileName)
+        public static bool IsFileUploadAcceptable(string mimeType, string fileName)
         {
             string fileExtention = fileName.Substring(fileName.LastIndexOf('.') + 1).ToLower();
             return ACCEPTABLE_FILE_EXTENTIONS_TO_UPLOAD.Contains(fileExtention);
@@ -71,7 +71,7 @@ namespace AliaaCommon
             return date.ToString();
         }
 
-        public static DataTable CreateDataTable<T>(DataTable table, List<T> list, bool convertDateToPersian = true, string[] excludeColumns = null)
+        public static DataTable CreateDataTable<T>(DataTable table, IEnumerable<T> list, bool convertDateToPersian = true, string[] excludeColumns = null)
         {
             if (list == null)
                 return null;
