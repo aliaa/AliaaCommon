@@ -40,27 +40,65 @@ namespace AliaaCommon
             this.UnifyNumbers = UnifyNumbers;
         }
     }
-
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-    public class MongoIndexAttribute : Attribute
+    public enum MongoIndexType
     {
-        public bool SetIndex { get; set; } = true;
-        public bool Unique { get; set; }
-        public bool Ascending { get; set; } = true;
-        public bool Sparse { get; set; }
-
-        public MongoIndexAttribute()
-        { }
-
-        public MongoIndexAttribute(bool SetIndex, bool Unique = false, bool Ascending = true, bool Sparse = false)
-        {
-            this.SetIndex = SetIndex;
-            this.Unique = Unique;
-            this.Ascending = Ascending;
-            this.Sparse = Sparse;
-        }
+        Acsending,
+        Descending,
+        Geo2D,
+        Geo2DSphere,
+        Text,
+        Hashed
     }
 
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
+    public class MongoIndexAttribute : Attribute
+    {
+        private string[] Fields;
+        private MongoIndexType[] Types;
+
+        public bool Unique { get; set; } = false;
+        public bool Sparse { get; set; } = false;
+
+        public MongoIndexAttribute(string[] Fields, MongoIndexType[] Types = null)
+        {
+            if (Fields == null || Fields.Length == 0)
+                throw new Exception();
+            this.Fields = Fields;
+            this.Types = Types;
+        }
+
+        public IndexKeysDefinition<T> GetIndexKeysDefinition<T>()
+        {
+            if (Fields.Length == 1)
+                return GetIndexDefForOne<T>(Fields[0], Types != null && Types.Length > 0 ? Types[0] : MongoIndexType.Acsending);
+
+            List<IndexKeysDefinition<T>> list = new List<IndexKeysDefinition<T>>(Fields.Length);
+            for (int i = 0; i < Fields.Length; i++)
+                list.Add(GetIndexDefForOne<T>(Fields[i], Types != null && Fields.Length > i ? Types[i] : MongoIndexType.Acsending));
+            return Builders<T>.IndexKeys.Combine(list);
+        }
+
+        private IndexKeysDefinition<T> GetIndexDefForOne<T>(string field, MongoIndexType type)
+        {
+            switch (type)
+            {
+                case MongoIndexType.Acsending:
+                    return Builders<T>.IndexKeys.Ascending(field);
+                case MongoIndexType.Descending:
+                    return Builders<T>.IndexKeys.Descending(field);
+                case MongoIndexType.Geo2D:
+                    return Builders<T>.IndexKeys.Geo2D(field);
+                case MongoIndexType.Geo2DSphere:
+                    return Builders<T>.IndexKeys.Geo2DSphere(field);
+                case MongoIndexType.Text:
+                    return Builders<T>.IndexKeys.Text(field);
+                case MongoIndexType.Hashed:
+                    return Builders<T>.IndexKeys.Hashed(field);
+                default:
+                    throw new Exception();
+            }
+        }
+    }
     public abstract class MongoEntity
     {
         [BsonId]
@@ -151,18 +189,9 @@ namespace AliaaCommon
 
         private static void SetIndexes(IMongoCollection<T> collection)
         {
-            foreach (PropertyInfo prop in typeof(T).GetProperties())
+            foreach (MongoIndexAttribute attr in typeof(T).GetCustomAttributes<MongoIndexAttribute>())
             {
-                MongoIndexAttribute attr = (MongoIndexAttribute)Attribute.GetCustomAttribute(prop, mongoIndexAttrType);
-                if (attr != null)
-                {
-                    IndexKeysDefinition<T> index;
-                    if (attr.Ascending)
-                        index = Builders<T>.IndexKeys.Ascending(prop.Name);
-                    else
-                        index = Builders<T>.IndexKeys.Descending(prop.Name);
-                    collection.Indexes.CreateOne(index, new CreateIndexOptions { Unique = attr.Unique, Sparse = attr.Sparse });
-                }
+                collection.Indexes.CreateOne(attr.GetIndexKeysDefinition<T>(), new CreateIndexOptions { Sparse = attr.Sparse, Unique = attr.Unique });
             }
         }
 
