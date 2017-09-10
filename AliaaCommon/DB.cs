@@ -67,6 +67,46 @@ namespace AliaaCommon
             this.Types = Types;
         }
 
+        public MongoIndexAttribute(string IndexDefinition)
+        {
+            BsonDocument doc = BsonDocument.Parse(IndexDefinition);
+            List<string> fieldsList = new List<string>(doc.ElementCount);
+            List<MongoIndexType> typesList = new List<MongoIndexType>(doc.ElementCount);
+            foreach (var elem in doc.Elements)
+            {
+                fieldsList.Add(elem.Name);
+                if(elem.Value.IsInt32)
+                {
+                    if (elem.Value.AsInt32 == -1)
+                        typesList.Add(MongoIndexType.Descending);
+                    else
+                        typesList.Add(MongoIndexType.Acsending);
+                }
+                else
+                {
+                    switch (elem.Value.AsString.ToLower())
+                    {
+                        case "2d":
+                            typesList.Add(MongoIndexType.Geo2D);
+                            break;
+                        case "2dsphere":
+                            typesList.Add(MongoIndexType.Geo2DSphere);
+                            break;
+                        case "text":
+                            typesList.Add(MongoIndexType.Text);
+                            break;
+                        case "hashed":
+                            typesList.Add(MongoIndexType.Hashed);
+                            break;
+                        default:
+                            throw new Exception("unkonwn index type!");
+                    }
+                }
+            }
+            Fields = fieldsList.ToArray();
+            Types = typesList.ToArray();
+        }
+
         public IndexKeysDefinition<T> GetIndexKeysDefinition<T>()
         {
             if (Fields.Length == 1)
@@ -78,7 +118,7 @@ namespace AliaaCommon
             return Builders<T>.IndexKeys.Combine(list);
         }
 
-        private IndexKeysDefinition<T> GetIndexDefForOne<T>(string field, MongoIndexType type)
+        private static IndexKeysDefinition<T> GetIndexDefForOne<T>(string field, MongoIndexType type)
         {
             switch (type)
             {
@@ -140,8 +180,6 @@ namespace AliaaCommon
             return db;
         }
         
-        static readonly Type mongoIndexAttrType = typeof(MongoIndexAttribute);
-
         public static IMongoCollection<T> Collection
         {
             get
