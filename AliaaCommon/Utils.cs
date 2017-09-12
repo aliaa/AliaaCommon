@@ -1,6 +1,7 @@
 ﻿using FarsiLibrary;
 using MongoDB.Bson;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -97,7 +98,7 @@ namespace AliaaCommon
                 string dispName = GetDisplayNameOfMember(p);
                 displayNames.Add(p, dispName);
                 Type propType = p.PropertyType;
-                if (propType.IsEquivalentTo(typeof(ObjectId)) || propType.IsEnum)
+                if (propType.IsEquivalentTo(typeof(ObjectId)) || propType.IsEnum || p.PropertyType.GetInterfaces().Contains(typeof(IEnumerable)))
                     propType = typeof(string);
                 DataColumn col = new DataColumn(dispName, propType);
                 table.Columns.Add(col);
@@ -117,6 +118,16 @@ namespace AliaaCommon
                         value = GetDisplayNameOfMember(p.PropertyType, value.ToString());
                     else if (value is DateTime && convertDateToPersian)
                         value = GetDateString((DateTime)value);
+                    else if (value is IEnumerable && !(value is string))
+                    {
+                        StringBuilder sb = new StringBuilder();
+                        foreach (object i in (IEnumerable)value)
+                        {
+                            sb.Append(i).Append(" ; ");
+                        }
+                        sb.Remove(sb.Length - 3, 3);
+                        value = sb.ToString();
+                    }
                     row[displayNames[p]] = value;
                 }
                 table.Rows.Add(row);
