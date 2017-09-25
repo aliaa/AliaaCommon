@@ -100,6 +100,9 @@ namespace AliaaCommon
                 Type propType = p.PropertyType;
                 if (propType.IsEquivalentTo(typeof(ObjectId)) || propType.IsEnum || p.PropertyType.GetInterfaces().Contains(typeof(IEnumerable)))
                     propType = typeof(string);
+                Type undelying = Nullable.GetUnderlyingType(propType);
+                if (undelying != null)
+                    propType = undelying;
                 DataColumn col = new DataColumn(dispName, propType);
                 table.Columns.Add(col);
             }
