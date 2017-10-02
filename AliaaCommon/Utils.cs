@@ -100,6 +100,9 @@ namespace AliaaCommon
                 Type propType = p.PropertyType;
                 if (propType.IsEquivalentTo(typeof(ObjectId)) || propType.IsEnum || p.PropertyType.GetInterfaces().Contains(typeof(IEnumerable)))
                     propType = typeof(string);
+                Type undelying = Nullable.GetUnderlyingType(propType);
+                if (undelying != null)
+                    propType = undelying;
                 DataColumn col = new DataColumn(dispName, propType);
                 table.Columns.Add(col);
             }
@@ -198,15 +201,28 @@ namespace AliaaCommon
         {
             if (date.Contains(' '))
                 date = date.Substring(0, date.IndexOf(' '));
-            int firstSeparatorIndex = date.IndexOf('/');
-            if (firstSeparatorIndex < 0)
-                firstSeparatorIndex = date.IndexOf('-');
-            int secondSeparatorIndex = date.IndexOf('/', firstSeparatorIndex + 1);
-            if (secondSeparatorIndex < 0)
-                secondSeparatorIndex = date.IndexOf('-', firstSeparatorIndex + 1);
-            int year = int.Parse(date.Substring(0, firstSeparatorIndex));
-            int month = int.Parse(date.Substring(firstSeparatorIndex + 1, secondSeparatorIndex - firstSeparatorIndex - 1));
-            int day = int.Parse(date.Substring(secondSeparatorIndex + 1, date.Length - secondSeparatorIndex - 1));
+            int year, month, day;
+            if (date.Contains('/') || date.Contains('-'))
+            {
+                int firstSeparatorIndex = date.IndexOf('/');
+                if (firstSeparatorIndex < 0)
+                    firstSeparatorIndex = date.IndexOf('-');
+                int secondSeparatorIndex = date.IndexOf('/', firstSeparatorIndex + 1);
+                if (secondSeparatorIndex < 0)
+                    secondSeparatorIndex = date.IndexOf('-', firstSeparatorIndex + 1);
+                year = int.Parse(date.Substring(0, firstSeparatorIndex));
+                month = int.Parse(date.Substring(firstSeparatorIndex + 1, secondSeparatorIndex - firstSeparatorIndex - 1));
+                day = int.Parse(date.Substring(secondSeparatorIndex + 1, date.Length - secondSeparatorIndex - 1));
+            }
+            else
+            {
+                if (date.Length == 6)
+                    date = "13" + date;
+                year = int.Parse(date.Substring(0, 4));
+                month = int.Parse(date.Substring(4, 2));
+                day = int.Parse(date.Substring(6, 2));
+            }
+            
             PersianDate pd = new PersianDate(year, month, day);
             return pd;
         }
@@ -294,6 +310,32 @@ namespace AliaaCommon
             if (alsoTime)
                 return pd.ToString();
             return pd.ToString("yyyy/MM/dd");
+        }
+
+        public static float GetSimilarityRateOfStrings(string s1, string s2)
+        {
+            string bigger, smaller;
+            if (s1.Length > s2.Length)
+            {
+                bigger = s1;
+                smaller = s2;
+            }
+            else
+            {
+                bigger = s2;
+                smaller = s1;
+            }
+
+            for (int size = smaller.Length; size > 0; size--)
+            {
+                for (int skip = 0; skip <= smaller.Length - size; skip++)
+                {
+                    string crop = smaller.Substring(skip, size);
+                    if (bigger.Contains(crop))
+                        return (float)size / bigger.Length;
+                }
+            }
+            return 0;
         }
     }
 }
