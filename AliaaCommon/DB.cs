@@ -147,8 +147,8 @@ namespace AliaaCommon
 
     public static class DB<T> where T : MongoEntity
     {
-        private static readonly string CONN_STRING = ConfigurationManager.AppSettings["MongoConnString"];
-        private static readonly string DB_NAME = ConfigurationManager.AppSettings["DBName"];
+        private static readonly string DEFAULT_CONN_STRING = ConfigurationManager.AppSettings["MongoConnString"];
+        private static readonly string DEFAULT_DB_NAME = ConfigurationManager.AppSettings["DBName"];
 
         public static bool writeLogDefaultValue = true, unifyCharsDefaultValue = true, unifyNumsDefaultValue;
 
@@ -159,9 +159,9 @@ namespace AliaaCommon
         /// Gets DataBase object with values of written in App.config or Web.config for connection string ("MongoConnString") and database name ("DBName")
         /// </summary>
         /// <returns></returns>
-        public static IMongoDatabase GetDatabase()
+        public static IMongoDatabase GetDefaultDatabase()
         {
-            return GetDatabase(CONN_STRING, DB_NAME);
+            return GetDatabase(DEFAULT_CONN_STRING, DEFAULT_DB_NAME);
         }
 
         public static IMongoDatabase GetDatabase(string connString, string dbName)
@@ -179,7 +179,12 @@ namespace AliaaCommon
 
             return db;
         }
-        
+
+        /// <summary>
+        /// Gets the collection object related to type of T class.
+        /// if a custom connection config key exists (MongodbCustomConnection_[collName]) it reads the value (dbName; mongodb://yourConnString) 
+        /// and connects to it; else finds in default connection and dbName.
+        /// </summary>
         public static IMongoCollection<T> Collection
         {
             get
@@ -189,7 +194,17 @@ namespace AliaaCommon
                     return Collections[ttype] as IMongoCollection<T>;
 
                 string collectionName = GetCollectionName(ttype);
-                IMongoCollection<T> collection = GetDatabase().GetCollection<T>(collectionName);
+                IMongoCollection<T> collection;
+                string customConnection = ConfigurationManager.AppSettings["MongodbCustomConnection_" + collectionName];
+                if (customConnection != null)
+                {
+                    string dbName = customConnection.Substring(0, customConnection.IndexOf(";")).Trim();
+                    string connString = customConnection.Substring(customConnection.IndexOf(";") + 1).Trim();
+                    collection = GetDatabase(connString, dbName).GetCollection<T>(collectionName);
+                }
+                else
+                    collection = GetDefaultDatabase().GetCollection<T>(collectionName);
+
                 SetIndexes(collection);
                 try
                 {
@@ -202,7 +217,7 @@ namespace AliaaCommon
 
         public static IMongoCollection<T> GetCollection(string collectionName)
         {
-            return GetCollection(CONN_STRING, DB_NAME, collectionName);
+            return GetCollection(DEFAULT_CONN_STRING, DEFAULT_DB_NAME, collectionName);
         }
 
         public static IMongoCollection<T> GetCollection(string connString, string dbName, string collectionName)
