@@ -65,14 +65,20 @@ namespace AliaaCommon
             return res;
         }
 
-        public static string GetDateString(DateTime date)
+        public static string GetDateString(DateTime date, bool includeTime)
         {
             if (Thread.CurrentThread.CurrentCulture.IsFarsiCulture())
-                return PersianDateConverter.ToPersianDate(date).ToString();
-            return date.ToString();
+            {
+                if(includeTime)
+                    return PersianDateConverter.ToPersianDate(date).ToString();
+                return PersianDateConverter.ToPersianDate(date).ToString("yy/mm/dd");
+            }
+            if(includeTime)
+                return date.ToString();
+            return date.ToShortDateString();
         }
 
-        public static DataTable CreateDataTable<T>(DataTable table, IEnumerable<T> list, bool convertDateToPersian = true, string[] excludeColumns = null)
+        public static DataTable CreateDataTable<T>(DataTable table, IEnumerable<T> list, bool convertDateToPersian = true, bool includeTimeInDates = true, string[] excludeColumns = null)
         {
             if (list == null)
                 return null;
@@ -100,9 +106,14 @@ namespace AliaaCommon
                 Type propType = p.PropertyType;
                 if (propType.IsEquivalentTo(typeof(ObjectId)) || propType.IsEnum || p.PropertyType.GetInterfaces().Contains(typeof(IEnumerable)))
                     propType = typeof(string);
-                Type undelying = Nullable.GetUnderlyingType(propType);
-                if (undelying != null)
-                    propType = undelying;
+                else if (propType == typeof(DateTime) && !includeTimeInDates)
+                    propType = typeof(string);
+                else
+                {
+                    Type undelying = Nullable.GetUnderlyingType(propType);
+                    if (undelying != null)
+                        propType = undelying;
+                }
                 DataColumn col = new DataColumn(dispName, propType);
                 table.Columns.Add(col);
             }
@@ -120,7 +131,7 @@ namespace AliaaCommon
                     else if (p.PropertyType.IsEnum)
                         value = GetDisplayNameOfMember(p.PropertyType, value.ToString());
                     else if (value is DateTime && convertDateToPersian)
-                        value = GetDateString((DateTime)value);
+                        value = GetDateString((DateTime)value, includeTimeInDates);
                     else if (value is IEnumerable && !(value is string))
                     {
                         StringBuilder sb = new StringBuilder();

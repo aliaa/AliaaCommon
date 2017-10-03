@@ -73,6 +73,7 @@
     <Compile Include="DisplayNameXAttribute.cs" />
     <Compile Include="HSLColor.cs" />
     <Compile Include="License.cs" />
+    <Compile Include="Models\AuthUser.cs" />
     <Compile Include="PersianCharacters.cs" />
     <Compile Include="UserActivity.cs" />
     <Compile Include="Utils.cs" />
