@@ -70,7 +70,9 @@
     <Compile Include="HSLColor.cs" />
     <Compile Include="License.cs" />
     <Compile Include="Models\AuthUser.cs" />
+    <Compile Include="ObjectIdJsonConverter.cs" />
     <Compile Include="PersianCharacters.cs" />
+    <Compile Include="TimeSpanJsonConverter.cs" />
     <Compile Include="UserActivity.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

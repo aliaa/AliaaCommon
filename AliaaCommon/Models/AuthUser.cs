@@ -47,9 +47,13 @@ namespace AliaaCommon.Models
             return Convert.ToBase64String(hash).Replace('+', '-').Replace('/', '_').Replace("=", "");
         }
 
-        public static bool CheckAuthentication(this IMongoCollection<AuthUser> collection, string username, string password)
+        public static bool CheckAuthentication(this IMongoCollection<AuthUser> collection, string username, string password, bool passwordIsHashed = false)
         {
-            string hash = GetHash(password);
+            string hash;
+            if (passwordIsHashed)
+                hash = password;
+            else
+                hash = GetHash(password);
             return collection.Count(u => u.Username == username && u.HashedPassword == hash) > 0;
         }
 

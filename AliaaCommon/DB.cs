@@ -331,7 +331,7 @@ namespace AliaaCommon
             }
         }
 
-        public static void Remove(T obj)
+        public static void Delete(T obj)
         {
             Collection.DeleteOne(t => t.Id == obj.Id);
 
@@ -343,7 +343,7 @@ namespace AliaaCommon
                 DB<UserActivity>.Save(new UserActivity(ActivityType.Delete, GetCollectionName(typeof(T)), obj));
         }
         
-        public static void Remove(ObjectId Id)
+        public static void Delete(ObjectId Id)
         {
             bool writeLog = writeLogDefaultValue;
             CollectionSaveAttribute attr = (CollectionSaveAttribute)Attribute.GetCustomAttribute(typeof(T), collSaveType);

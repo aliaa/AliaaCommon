@@ -65,17 +65,20 @@ namespace AliaaCommon
             return res;
         }
 
-        public static string GetDateString(DateTime date, bool includeTime)
+        public static string GetDateString(DateTime date, bool includeTime = true)
         {
             if (Thread.CurrentThread.CurrentCulture.IsFarsiCulture())
-            {
-                if(includeTime)
-                    return PersianDateConverter.ToPersianDate(date).ToString();
-                return PersianDateConverter.ToPersianDate(date).ToString("yy/mm/dd");
-            }
-            if(includeTime)
+                return GetPersianDateString(date, includeTime);
+            if (includeTime)
                 return date.ToString();
             return date.ToShortDateString();
+        }
+
+        public static string GetPersianDateString(DateTime date, bool includeTime = true)
+        {
+            if (includeTime)
+                return PersianDateConverter.ToPersianDate(date).ToString();
+            return PersianDateConverter.ToPersianDate(date).ToString("yy/mm/dd");
         }
 
         public static DataTable CreateDataTable<T>(DataTable table, IEnumerable<T> list, bool convertDateToPersian = true, bool includeTimeInDates = true, string[] excludeColumns = null)
@@ -306,7 +309,7 @@ namespace AliaaCommon
         }
 
 
-        public static string GetDatePersianString(long time, bool isLinuxEpoch, bool alsoTime)
+        public static string GetPersianDateString(long time, bool isLinuxEpoch, bool alsoTime)
         {
             DateTime dt;
             if (isLinuxEpoch)
@@ -347,6 +350,46 @@ namespace AliaaCommon
                 }
             }
             return 0;
+        }
+
+        public static DateTime PersianDateTimeToGeorgian(string persianDateTime)
+        {
+            string[] dateTime = persianDateTime.Split(' ');
+            string date = dateTime[0];
+            string time;
+            if (dateTime.Length > 1)
+                time = dateTime[1];
+            else
+                time = "00:00:00";
+            int year = int.Parse(date.Split('/')[0]);
+            int month = int.Parse(date.Split('/')[1]);
+            int day = int.Parse(date.Split('/')[2]); ;
+            int hour = int.Parse(time.Split(':')[0]);
+            int minute = int.Parse(time.Split(':')[1]);
+            int second = int.Parse(time.Split(':')[2]);
+
+            System.Globalization.PersianCalendar p = new System.Globalization.PersianCalendar();
+            DateTime dt = p.ToDateTime(year, month, day, hour, minute, second, 0, 0);
+            return DateTime.SpecifyKind(dt, DateTimeKind.Utc);
+        }
+
+        private static readonly Type DateTimeType = typeof(DateTime);
+        public static void CorrectPersianDateTimes<T>(T obj)
+        {
+            Type type = typeof(T);
+            foreach (PropertyInfo p in type.GetProperties())
+            {
+                if (p.PropertyType.IsEquivalentTo(DateTimeType))
+                {
+                    DateTime dt = (DateTime)p.GetValue(obj);
+                    if (dt.Year < 2000 && dt.Year > 1000)
+                    {
+                        dt = PersianDateConverter.ToGregorianDateTime(dt.Year + "/" + dt.Month + "/" + dt.Day);
+                        dt = dt.AddHours(12);
+                        p.SetValue(obj, dt);
+                    }
+                }
+            }
         }
     }
 }
