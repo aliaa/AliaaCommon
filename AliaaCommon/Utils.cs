@@ -12,7 +12,6 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace AliaaCommon
@@ -142,7 +141,8 @@ namespace AliaaCommon
                         {
                             sb.Append(i).Append(" ; ");
                         }
-                        sb.Remove(sb.Length - 3, 3);
+                        if(sb.Length > 3)
+                            sb.Remove(sb.Length - 3, 3);
                         value = sb.ToString();
                     }
                     row[displayNames[p]] = value;

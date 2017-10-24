@@ -10,7 +10,7 @@ using System.Web;
 
 namespace AliaaCommon.Models
 {
-    [MongoIndex("{" + nameof(Username) + ":1}")]
+    [MongoIndex(Fields: new string[] { nameof(Username) }, Unique = true)]
     public class AuthUser : MongoEntity
     {
         public string Username { get; set; }

@@ -27,7 +27,7 @@ namespace AliaaCommon.WebControls
 
         }
 
-        public void CreateUI(Type type, int columnCount = 2)
+        public void CreateUI(Type type, bool enabled = true, int columnCount = 2, Dictionary<string, int> fieldsColSpan = null)
         {
             if(table == null)
             {
@@ -89,8 +89,17 @@ namespace AliaaCommon.WebControls
                     default:
                         break;
                 }
+                if (ctrl == null)
+                    continue;
+                ctrl.Enabled = enabled;
                 ctrl.ID = controlID;
                 TableCell ctrlCell = new TableCell();
+                if(fieldsColSpan != null && fieldsColSpan.ContainsKey(prop.Name))
+                {
+                    ctrlCell.ColumnSpan = (fieldsColSpan[prop.Name] - 1) * 3 + 1;
+                    i += fieldsColSpan[prop.Name] - 1;
+                    ctrl.Style.Add("width", "99%");
+                }
                 ctrlCell.Controls.Add(ctrl);
                 row.Cells.Add(ctrlCell);
 

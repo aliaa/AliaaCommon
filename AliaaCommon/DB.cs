@@ -149,6 +149,7 @@ namespace AliaaCommon
     {
         private static readonly string DEFAULT_CONN_STRING = ConfigurationManager.AppSettings["MongoConnString"];
         private static readonly string DEFAULT_DB_NAME = ConfigurationManager.AppSettings["DBName"];
+        private static readonly bool DONT_SET_DICTIONARY_CONVENTION_TO_ARRAY_OF_DOCUMENTS = ConfigurationManager.AppSettings["setDictionaryConventionToArrayOfDocuments"] == "false";
 
         public static bool writeLogDefaultValue = true, unifyCharsDefaultValue = true, unifyNumsDefaultValue;
 
@@ -166,6 +167,11 @@ namespace AliaaCommon
 
         public static IMongoDatabase GetDatabase(string connString, string dbName)
         {
+            return GetDatabase(connString, dbName, !DONT_SET_DICTIONARY_CONVENTION_TO_ARRAY_OF_DOCUMENTS);
+        }
+
+        public static IMongoDatabase GetDatabase(string connString, string dbName, bool setDictionaryConventionToArrayOfDocuments)
+        {
             if (db != null)
                 return db;
             //MongoClientSettings settings = new MongoClientSettings();
@@ -173,10 +179,12 @@ namespace AliaaCommon
             MongoClient client = new MongoClient(connString);
             db = client.GetDatabase(dbName);
 
-            ConventionRegistry.Register(
-                nameof(DictionaryRepresentationConvention),
-                new ConventionPack { new DictionaryRepresentationConvention(DictionaryRepresentation.ArrayOfDocuments) }, _ => true);
-
+            if (setDictionaryConventionToArrayOfDocuments)
+            {
+                ConventionRegistry.Register(
+                    nameof(DictionaryRepresentationConvention),
+                    new ConventionPack { new DictionaryRepresentationConvention(DictionaryRepresentation.ArrayOfDocuments) }, _ => true);
+            }
             return db;
         }
 
