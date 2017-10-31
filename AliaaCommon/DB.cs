@@ -228,15 +228,20 @@ namespace AliaaCommon
             return GetCollection(DEFAULT_CONN_STRING, DEFAULT_DB_NAME, collectionName);
         }
 
+        public static IMongoCollection<T> GetCollection(string dbName, string collectionName)
+        {
+            return GetCollection(DEFAULT_CONN_STRING, dbName, collectionName);
+        }
+
         public static IMongoCollection<T> GetCollection(string connString, string dbName, string collectionName)
         {
             IMongoCollection<T> collection = GetDatabase(connString, dbName).GetCollection<T>(collectionName);
             SetIndexes(collection);
-            try
-            {
-                Collections.Add(typeof(T), collection);
-            }
-            catch { }
+            //try
+            //{
+            //    Collections.Add(typeof(T), collection);
+            //}
+            //catch { }
             return collection;
         }
 

@@ -50,6 +50,13 @@ namespace AliaaCommon.WebControls
                     row = new TableRow();
                 }
                 
+                if (fieldsColSpan != null && fieldsColSpan.ContainsKey(prop.Name) && i % columnCount + fieldsColSpan[prop.Name] > columnCount)
+                {
+                    table.Rows.Add(row);
+                    row = new TableRow();
+                    i += columnCount - (i % columnCount);
+                }
+                
                 Label lbl = new Label { Text = Utils.GetDisplayNameOfMember(prop) + ":" };
                 TableCell titleCell = new TableCell();
                 titleCell.Controls.Add(lbl);
@@ -96,8 +103,9 @@ namespace AliaaCommon.WebControls
                 TableCell ctrlCell = new TableCell();
                 if(fieldsColSpan != null && fieldsColSpan.ContainsKey(prop.Name))
                 {
-                    ctrlCell.ColumnSpan = (fieldsColSpan[prop.Name] - 1) * 3 + 1;
-                    i += fieldsColSpan[prop.Name] - 1;
+                    int span = fieldsColSpan[prop.Name];
+                    ctrlCell.ColumnSpan = (span - 1) * 3 + 1;
+                    i += span - 1;
                     ctrl.Style.Add("width", "99%");
                 }
                 ctrlCell.Controls.Add(ctrl);
