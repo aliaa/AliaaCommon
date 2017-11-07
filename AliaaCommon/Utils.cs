@@ -80,10 +80,8 @@ namespace AliaaCommon
             return PersianDateConverter.ToPersianDate(date).ToString("yy/mm/dd");
         }
 
-        public static DataTable CreateDataTable<T>(DataTable table, IEnumerable<T> list, bool convertDateToPersian = true, bool includeTimeInDates = true, string[] excludeColumns = null)
+        public static Dictionary<PropertyInfo, string> CreateDataTableColumns<T>(DataTable table, bool includeTimeInDates = true, string[] excludeColumns = null)
         {
-            if (list == null)
-                return null;
             Type ttype = typeof(T);
             PropertyInfo[] props = ttype.GetProperties();
             Dictionary<PropertyInfo, string> displayNames = new Dictionary<PropertyInfo, string>();
@@ -105,6 +103,9 @@ namespace AliaaCommon
                 }
                 string dispName = GetDisplayNameOfMember(p);
                 displayNames.Add(p, dispName);
+                if (table.Columns.Contains(dispName))
+                    continue;
+
                 Type propType = p.PropertyType;
                 if (propType.IsEquivalentTo(typeof(ObjectId)) || propType.IsEnum || p.PropertyType.GetInterfaces().Contains(typeof(IEnumerable)))
                     propType = typeof(string);
@@ -119,6 +120,14 @@ namespace AliaaCommon
                 DataColumn col = new DataColumn(dispName, propType);
                 table.Columns.Add(col);
             }
+            return displayNames;
+        }
+
+        public static DataTable CreateDataTable<T>(DataTable table, IEnumerable<T> list, bool convertDateToPersian = true, bool includeTimeInDates = true, string[] excludeColumns = null)
+        {
+            if (list == null)
+                return null;
+            Dictionary<PropertyInfo, string> displayNames = CreateDataTableColumns<T>(table, includeTimeInDates, excludeColumns);
 
             foreach (T item in list)
             {

@@ -13,7 +13,7 @@ namespace AliaaCommon.WebControls
 {
     public partial class ObjectEditorUI : System.Web.UI.UserControl
     {
-        private enum ControlType
+        public enum ControlType
         {
             Text,
             Number,
@@ -27,7 +27,8 @@ namespace AliaaCommon.WebControls
 
         }
 
-        public void CreateUI(Type type, bool enabled = true, int columnCount = 2, Dictionary<string, int> fieldsColSpan = null)
+        public void CreateUI(Type type, bool enabled = true, int columnCount = 2, Dictionary<string, int> fieldsColSpan = null, 
+            Dictionary<string, ControlType> overrideTypes = null, Dictionary<string, List<ListItem>> comboItems = null)
         {
             if(table == null)
             {
@@ -39,7 +40,11 @@ namespace AliaaCommon.WebControls
             foreach (PropertyInfo prop in type.GetProperties())
             {
                 Type ptype = prop.PropertyType;
-                ControlType controlType = GetControlType(ptype);
+                ControlType controlType;
+                if (overrideTypes != null && overrideTypes.ContainsKey(prop.Name))
+                    controlType = overrideTypes[prop.Name];
+                else
+                    controlType = GetControlType(ptype);
                 if (controlType == ControlType.Unknown)
                     continue;
 
@@ -82,12 +87,20 @@ namespace AliaaCommon.WebControls
                         break;
                     case ControlType.Combo:
                         ctrl = new DropDownList();
-                        Array enumVals = ptype.GetEnumValues();
-                        for (int j = 0; j < enumVals.Length; j++)
+                        if (comboItems != null && comboItems.ContainsKey(prop.Name))
                         {
-                            string name = enumVals.GetValue(j).ToString();
-                            string dispName = Utils.GetDisplayNameOfMember(ptype, name);
-                            (ctrl as DropDownList).Items.Add(new ListItem(dispName, name));
+                            foreach (ListItem item in comboItems[prop.Name])
+                                (ctrl as DropDownList).Items.Add(item);
+                        }
+                        else
+                        {
+                            Array enumVals = ptype.GetEnumValues();
+                            for (int j = 0; j < enumVals.Length; j++)
+                            {
+                                string name = enumVals.GetValue(j).ToString();
+                                string dispName = Utils.GetDisplayNameOfMember(ptype, name);
+                                (ctrl as DropDownList).Items.Add(new ListItem(dispName, name));
+                            }
                         }
                         break;
                     case ControlType.Check:
@@ -129,7 +142,7 @@ namespace AliaaCommon.WebControls
             return ControlType.Unknown;
         }
 
-        public void FillFromObject<T>(T obj)
+        public void FillFromObject<T>(T obj, Dictionary<string, ControlType> overrideTypes = null)
         {
             if (obj == null)
                 return;
@@ -137,11 +150,14 @@ namespace AliaaCommon.WebControls
             foreach (PropertyInfo prop in type.GetProperties())
             {
                 Type ptype = prop.PropertyType;
-                string controlID = "ac_" + prop.Name;
-                Control ctrl = table.FindControl(controlID);
+                Control ctrl = GetControl(prop.Name);
                 if (ctrl == null)
                     continue;
-                ControlType controlType = GetControlType(ptype);
+                ControlType controlType;
+                if (overrideTypes != null && overrideTypes.ContainsKey(prop.Name))
+                    controlType = overrideTypes[prop.Name];
+                else
+                    controlType = GetControlType(ptype);
                 if (controlType == ControlType.Unknown)
                     continue;
                 switch (controlType)
@@ -162,7 +178,13 @@ namespace AliaaCommon.WebControls
             }
         }
 
-        public void FillToObject<T>(T obj)
+        public Control GetControl(string propName)
+        {
+            string controlID = "ac_" + propName;
+            return table.FindControl(controlID);
+        }
+
+        public void FillToObject<T>(T obj, Dictionary<string, ControlType> overrideTypes = null)
         {
             if (obj == null)
                 return;
@@ -170,11 +192,14 @@ namespace AliaaCommon.WebControls
             foreach (PropertyInfo prop in type.GetProperties())
             {
                 Type ptype = prop.PropertyType;
-                string controlID = "ac_" + prop.Name;
-                Control ctrl = table.FindControl(controlID);
+                Control ctrl = GetControl(ptype.Name);
                 if (ctrl == null)
                     continue;
-                ControlType controlType = GetControlType(ptype);
+                ControlType controlType;
+                if (overrideTypes != null && overrideTypes.ContainsKey(prop.Name))
+                    controlType = overrideTypes[prop.Name];
+                else
+                    controlType = GetControlType(ptype);
                 if (controlType == ControlType.Unknown)
                     continue;
                 switch (controlType)
@@ -199,7 +224,11 @@ namespace AliaaCommon.WebControls
 
                     case ControlType.Combo:
                         string selectedStr = (ctrl as DropDownList).SelectedValue;
-                        prop.SetValue(obj, Enum.Parse(ptype, selectedStr));
+                        try
+                        {
+                            prop.SetValue(obj, Enum.Parse(ptype, selectedStr));
+                        }
+                        catch { }
                         break;
 
                     case ControlType.Check:
