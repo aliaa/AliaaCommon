@@ -160,17 +160,20 @@ namespace AliaaCommon.WebControls
                     controlType = GetControlType(ptype);
                 if (controlType == ControlType.Unknown)
                     continue;
+                object value = prop.GetValue(obj);
+                if (value == null)
+                    continue;
                 switch (controlType)
                 {
                     case ControlType.Text:
                     case ControlType.Number:
-                        (ctrl as TextBox).Text = prop.GetValue(obj).ToString();
+                        (ctrl as TextBox).Text = value.ToString();
                         break;
                     case ControlType.Combo:
-                        (ctrl as DropDownList).SelectedValue = prop.GetValue(obj).ToString();
+                        (ctrl as DropDownList).SelectedValue = value.ToString();
                         break;
                     case ControlType.Check:
-                        (ctrl as CheckBox).Checked = (bool)prop.GetValue(obj);
+                        (ctrl as CheckBox).Checked = (bool)value;
                         break;
                     default:
                         break;
