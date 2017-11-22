@@ -18,6 +18,7 @@ namespace AliaaCommon.Models
         public bool IsAdmin { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public bool Disabled { get; set; }
         public string DisplayName
         {
             get { return FirstName + " " + LastName; }
@@ -54,7 +55,7 @@ namespace AliaaCommon.Models
                 hash = password;
             else
                 hash = GetHash(password);
-            return collection.Count(u => u.Username == username && u.HashedPassword == hash) > 0;
+            return collection.Count(u => u.Username == username && u.HashedPassword == hash && u.Disabled != true) > 0;
         }
 
         public static AuthUser GetByUsername(this IMongoCollection<AuthUser> collection, string username)

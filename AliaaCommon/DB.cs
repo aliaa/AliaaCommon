@@ -75,7 +75,7 @@ namespace AliaaCommon
             foreach (var elem in doc.Elements)
             {
                 fieldsList.Add(elem.Name);
-                if(elem.Value.IsInt32)
+                if (elem.Value.IsInt32)
                 {
                     if (elem.Value.AsInt32 == -1)
                         typesList.Add(MongoIndexType.Descending);
@@ -139,6 +139,8 @@ namespace AliaaCommon
             }
         }
     }
+
+    [Serializable]
     public abstract class MongoEntity
     {
         [BsonId]

@@ -195,7 +195,7 @@ namespace AliaaCommon.WebControls
             foreach (PropertyInfo prop in type.GetProperties())
             {
                 Type ptype = prop.PropertyType;
-                Control ctrl = GetControl(ptype.Name);
+                Control ctrl = GetControl(prop.Name);
                 if (ctrl == null)
                     continue;
                 ControlType controlType;
