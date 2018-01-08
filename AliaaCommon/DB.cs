@@ -155,7 +155,7 @@ namespace AliaaCommon
 
         public static bool writeLogDefaultValue = true, unifyCharsDefaultValue = true, unifyNumsDefaultValue;
 
-        private static IMongoDatabase db = null;
+        private static IMongoDatabase defaultDB = null;
         private static Dictionary<Type, object> Collections = new Dictionary<Type, object>();
 
         /// <summary>
@@ -164,7 +164,10 @@ namespace AliaaCommon
         /// <returns></returns>
         public static IMongoDatabase GetDefaultDatabase()
         {
-            return GetDatabase(DEFAULT_CONN_STRING, DEFAULT_DB_NAME);
+            if (defaultDB != null)
+                return defaultDB;
+            defaultDB = GetDatabase(DEFAULT_CONN_STRING, DEFAULT_DB_NAME);
+            return defaultDB;
         }
 
         public static IMongoDatabase GetDatabase(string connString, string dbName)
@@ -174,12 +177,10 @@ namespace AliaaCommon
 
         public static IMongoDatabase GetDatabase(string connString, string dbName, bool setDictionaryConventionToArrayOfDocuments)
         {
-            if (db != null)
-                return db;
             //MongoClientSettings settings = new MongoClientSettings();
             //settings.Server = new MongoServerAddress("172.26.2.15");
             MongoClient client = new MongoClient(connString);
-            db = client.GetDatabase(dbName);
+            var db = client.GetDatabase(dbName);
 
             if (setDictionaryConventionToArrayOfDocuments)
             {

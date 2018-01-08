@@ -11,6 +11,7 @@ using System.Web;
 namespace AliaaCommon.Models
 {
     [MongoIndex(Fields: new string[] { nameof(Username) }, Unique = true)]
+    [BsonIgnoreExtraElements]
     public class AuthUser : MongoEntity
     {
         public string Username { get; set; }
@@ -19,6 +20,8 @@ namespace AliaaCommon.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public bool Disabled { get; set; }
+        public List<string> Applications { get; set; } = new List<string>();
+
         public string DisplayName
         {
             get { return FirstName + " " + LastName; }
