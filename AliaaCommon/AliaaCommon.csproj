@@ -69,6 +69,7 @@
     <Compile Include="DB.cs" />
     <Compile Include="DisplayNameXAttribute.cs" />
     <Compile Include="HSLColor.cs" />
+    <Compile Include="HttpHeadersCleanup.cs" />
     <Compile Include="License.cs" />
     <Compile Include="Models\AuthUser.cs" />
     <Compile Include="ObjectIdJsonConverter.cs" />
