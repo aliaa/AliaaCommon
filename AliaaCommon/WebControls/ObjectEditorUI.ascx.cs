@@ -69,10 +69,31 @@ namespace AliaaCommon.WebControls
 
                 TableCell validationCell = new TableCell();
                 string controlID = "ac_" + prop.Name;
-                if(prop.GetCustomAttribute<RequiredAttribute>() != null)
+
+                RequiredAttribute reqAttr = prop.GetCustomAttribute<RequiredAttribute>();
+                if (reqAttr != null)
                 {
-                    RequiredFieldValidator reqValidator = new RequiredFieldValidator { ControlToValidate = controlID, ForeColor = Color.Red, Text = "*" };
+                    RequiredFieldValidator reqValidator = new RequiredFieldValidator
+                    {
+                        ControlToValidate = controlID,
+                        ForeColor = Color.Red,
+                        Text = "*",
+                        ErrorMessage = reqAttr.ErrorMessage
+                    };
                     validationCell.Controls.Add(reqValidator);
+                }
+                RegularExpressionAttribute regexAttr = prop.GetCustomAttribute<RegularExpressionAttribute>();
+                if (regexAttr != null)
+                {
+                    RegularExpressionValidator regexValidator = new RegularExpressionValidator
+                    {
+                        ControlToValidate = controlID,
+                        ForeColor = Color.Red,
+                        Text = "*",
+                        ValidationExpression = regexAttr.Pattern,
+                        ErrorMessage = regexAttr.ErrorMessage
+                    };
+                    validationCell.Controls.Add(regexValidator);
                 }
                 row.Cells.Add(validationCell);
 
