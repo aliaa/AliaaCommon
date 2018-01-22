@@ -28,7 +28,7 @@ namespace AliaaCommon.WebControls
         }
 
         public void CreateUI(Type type, bool enabled = true, int columnCount = 2, Dictionary<string, int> fieldsColSpan = null, 
-            Dictionary<string, ControlType> overrideTypes = null, Dictionary<string, List<ListItem>> comboItems = null)
+            Dictionary<string, ControlType> overrideTypes = null, Dictionary<string, List<ListItem>> comboItems = null, string[] excludeFields = null)
         {
             if(table == null)
             {
@@ -39,6 +39,8 @@ namespace AliaaCommon.WebControls
             int i = 0;
             foreach (PropertyInfo prop in type.GetProperties())
             {
+                if (excludeFields != null && excludeFields.Contains(prop.Name))
+                    continue;
                 Type ptype = prop.PropertyType;
                 ControlType controlType;
                 if (overrideTypes != null && overrideTypes.ContainsKey(prop.Name))

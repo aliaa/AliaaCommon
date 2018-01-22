@@ -2,6 +2,7 @@
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -14,12 +15,25 @@ namespace AliaaCommon.Models
     [BsonIgnoreExtraElements]
     public class AuthUser : MongoEntity
     {
+        [Required]
+        [DisplayNameX("نام کاربری")]
         public string Username { get; set; }
+
         public string HashedPassword { get; set; }
+
         public bool IsAdmin { get; set; }
+        
+        [Required]
+        [DisplayNameX("نام")]
         public string FirstName { get; set; }
+        
+        [Required]
+        [DisplayNameX("نام خانوادگی")]
         public string LastName { get; set; }
+
+        [DisplayNameX("غیر فعال شده")]
         public bool Disabled { get; set; }
+
         public List<string> Applications { get; set; } = new List<string>();
 
         public string DisplayName
