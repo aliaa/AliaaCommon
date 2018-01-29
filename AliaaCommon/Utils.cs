@@ -290,6 +290,21 @@ namespace AliaaCommon
             }
         }
 
+        public static string GetPersianDayOfWeekName(int day)
+        {
+            switch (day)
+            {
+                case 0: return "شنبه";
+                case 1: return "یکشنبه";
+                case 2: return "دوشنبه";
+                case 3: return "سه شنبه";
+                case 4: return "چهارشنبه";
+                case 5: return "پنجشنبه";
+                case 6: return "جمعه";
+                default: return null;
+            }
+        }
+
         public static byte[] XorBytes(byte[] b1, byte[] b2)
         {
             int min = Math.Min(b1.Length, b2.Length);

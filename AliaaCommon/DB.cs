@@ -3,7 +3,9 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson.Serialization.Options;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace AliaaCommon
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
     public class CollectionNameAttribute : Attribute
     {
         public string CollectionName { get; private set; }
@@ -26,7 +28,7 @@ namespace AliaaCommon
         }
     }
 
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class CollectionSaveAttribute : Attribute
     {
         public bool WriteLog { get; set; }
@@ -143,6 +145,7 @@ namespace AliaaCommon
     [Serializable]
     public abstract class MongoEntity
     {
+        [JsonConverter(typeof(ObjectIdJsonConverter))]
         [BsonId]
         public ObjectId Id { get; set; }
     }
@@ -156,7 +159,7 @@ namespace AliaaCommon
         public static bool writeLogDefaultValue = true, unifyCharsDefaultValue = true, unifyNumsDefaultValue;
 
         private static IMongoDatabase defaultDB = null;
-        private static Dictionary<Type, object> Collections = new Dictionary<Type, object>();
+        private static Dictionary<string, object> Collections = new Dictionary<string, object>();
 
         /// <summary>
         /// Gets DataBase object with values of written in App.config or Web.config for connection string ("MongoConnString") and database name ("DBName")
@@ -177,8 +180,6 @@ namespace AliaaCommon
 
         public static IMongoDatabase GetDatabase(string connString, string dbName, bool setDictionaryConventionToArrayOfDocuments)
         {
-            //MongoClientSettings settings = new MongoClientSettings();
-            //settings.Server = new MongoServerAddress("172.26.2.15");
             MongoClient client = new MongoClient(connString);
             var db = client.GetDatabase(dbName);
 
@@ -188,6 +189,7 @@ namespace AliaaCommon
                     nameof(DictionaryRepresentationConvention),
                     new ConventionPack { new DictionaryRepresentationConvention(DictionaryRepresentation.ArrayOfDocuments) }, _ => true);
             }
+            BsonSerializer.RegisterSerializationProvider(new CustomSerializationProvider());
             return db;
         }
 
@@ -200,11 +202,10 @@ namespace AliaaCommon
         {
             get
             {
-                Type ttype = typeof(T);
-                if (Collections.ContainsKey(ttype))
-                    return Collections[ttype] as IMongoCollection<T>;
+                string collectionName = GetCollectionName(typeof(T));
+                if (Collections.ContainsKey(collectionName))
+                    return Collections[collectionName] as IMongoCollection<T>;
 
-                string collectionName = GetCollectionName(ttype);
                 IMongoCollection<T> collection;
                 string customConnection = ConfigurationManager.AppSettings["MongodbCustomConnection_" + collectionName];
                 if (customConnection != null)
@@ -219,7 +220,7 @@ namespace AliaaCommon
                 SetIndexes(collection);
                 try
                 {
-                    Collections.Add(ttype, collection);
+                    Collections.Add(collectionName, collection);
                 }
                 catch { }
                 return collection;
@@ -414,6 +415,39 @@ namespace AliaaCommon
                 return childSerializerConfigurable == null
                     ? serializer
                     : childSerializerConfigurable.WithChildSerializer(ConfigureSerializer(childSerializerConfigurable.ChildSerializer));
+            }
+        }
+
+        public class CustomSerializationProvider : IBsonSerializationProvider
+        {
+            static LocalDateTimeSerializer dateTimeSerializer = new LocalDateTimeSerializer();
+            static Type dateTimeType = typeof(DateTime);
+
+            public IBsonSerializer GetSerializer(Type type)
+            {
+                if (type == dateTimeType)
+                    return dateTimeSerializer;
+
+                return null; // falls back to Mongo defaults
+            }
+        }
+
+        public class LocalDateTimeSerializer : DateTimeSerializer
+        {
+            //  MongoDB returns datetime as DateTimeKind.Utc, which cann't be used in our timezone conversion logic
+            //  We overwrite it to be DateTimeKind.Unspecified
+            public override DateTime Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
+            {
+                var obj = base.Deserialize(context, args);
+                return new DateTime(obj.Ticks, DateTimeKind.Unspecified);
+            }
+
+            //  MongoDB stores all datetime as Utc, any datetime value DateTimeKind is not DateTimeKind.Utc, will be converted to Utc first
+            //  We overwrite it to be DateTimeKind.Utc, becasue we want to preserve the raw value
+            public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, DateTime value)
+            {
+                var utcValue = new DateTime(value.Ticks, DateTimeKind.Utc);
+                base.Serialize(context, args, utcValue);
             }
         }
     }
