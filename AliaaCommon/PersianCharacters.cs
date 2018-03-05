@@ -59,6 +59,7 @@ namespace AliaaCommon
         private static readonly List<char> PRIMARY_CHARS, IGNORED_CHARS;
         private static readonly Dictionary<char, char> CHAR_MAPPING;
         private static readonly Dictionary<char, char> NUMBERS_MAPPING;
+        private static readonly Dictionary<char, char> NUMBERS_MAPPING_REVERSE;
 
         static PersianCharacters()
         {
@@ -380,6 +381,19 @@ namespace AliaaCommon
             NUMBERS_MAPPING.Add('\u0037', N7);
             NUMBERS_MAPPING.Add('\u0038', N8);
             NUMBERS_MAPPING.Add('\u0039', N9);
+
+            NUMBERS_MAPPING_REVERSE = new Dictionary<char, char>();
+
+            NUMBERS_MAPPING_REVERSE.Add(N0, '\u0030');
+            NUMBERS_MAPPING_REVERSE.Add(N1, '\u0031');
+            NUMBERS_MAPPING_REVERSE.Add(N2, '\u0032');
+            NUMBERS_MAPPING_REVERSE.Add(N3, '\u0033');
+            NUMBERS_MAPPING_REVERSE.Add(N4, '\u0034');
+            NUMBERS_MAPPING_REVERSE.Add(N5, '\u0035');
+            NUMBERS_MAPPING_REVERSE.Add(N6, '\u0036');
+            NUMBERS_MAPPING_REVERSE.Add(N7, '\u0037');
+            NUMBERS_MAPPING_REVERSE.Add(N8, '\u0038');
+            NUMBERS_MAPPING_REVERSE.Add(N9, '\u0039');
         }
 
         public static char UnifyCharacter(char ch, bool farsiNumbers)
@@ -400,6 +414,25 @@ namespace AliaaCommon
             {
                 if (!IGNORED_CHARS.Contains(ch))
                     sb.Append(UnifyCharacter(ch, farsiNumbers));
+            }
+            return sb.ToString();
+        }
+
+        public static char ConvertPersianDigitToEnglish(char ch)
+        {
+            if (NUMBERS_MAPPING_REVERSE.ContainsKey(ch))
+                return NUMBERS_MAPPING_REVERSE[ch];
+            return ch;
+        }
+
+        public static string ConvertPersianDigitToEnglish(string str)
+        {
+            if (string.IsNullOrEmpty(str))
+                return str;
+            StringBuilder sb = new StringBuilder();
+            foreach (char ch in str)
+            {
+                sb.Append(ConvertPersianDigitToEnglish(ch));
             }
             return sb.ToString();
         }
