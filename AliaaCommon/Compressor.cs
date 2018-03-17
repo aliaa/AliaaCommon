@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.UI;
 
@@ -47,8 +48,15 @@ namespace AliaaCommon
         /// <returns>return this as "LoadPageStateFromPersistenceMedium" method result </returns>
         public static object DecompressViewState(HttpRequest request)
         {
-            string viewState = request.Form["__VSTATE"];
-            byte[] bytes = Convert.FromBase64String(viewState);
+            StringBuilder viewStateBase64 = new StringBuilder();
+            int i = 0;
+            string viewStateChunk;
+            while((viewStateChunk = request.Form["__VSTATE" + i]) != null)
+            {
+                viewStateBase64.Append(viewStateChunk);
+                i++;
+            }
+            byte[] bytes = Convert.FromBase64String(viewStateBase64.ToString());
             bytes = Decompress(bytes);
             LosFormatter formatter = new LosFormatter();
             return formatter.Deserialize(Convert.ToBase64String(bytes));
@@ -59,7 +67,7 @@ namespace AliaaCommon
         /// </summary>
         /// <param name="clientScript">ClientScript object of page</param>
         /// <param name="viewState">parameter of "SavePageStateToPersistenceMedium" method</param>
-        public static void CompressViewState(ClientScriptManager clientScript, object viewState)
+        public static void CompressViewState(ClientScriptManager clientScript, object viewState, int splitSize = 4000)
         {
             LosFormatter formatter = new LosFormatter();
             StringWriter writer = new StringWriter();
@@ -67,7 +75,13 @@ namespace AliaaCommon
             string viewStateString = writer.ToString();
             byte[] bytes = Convert.FromBase64String(viewStateString);
             bytes = Compress(bytes);
-            clientScript.RegisterHiddenField("__VSTATE", Convert.ToBase64String(bytes));
+            int byteSplitSize = splitSize / 4 * 3;
+            for (int i = 0; i <= bytes.Length / byteSplitSize; i++)
+            {
+                int offset = i * byteSplitSize;
+                string base64 = Convert.ToBase64String(bytes, offset, Math.Min(byteSplitSize, bytes.Length - offset));
+                clientScript.RegisterHiddenField("__VSTATE"+i, base64);
+            }
         }
     }
 }
