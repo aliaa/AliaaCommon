@@ -400,8 +400,16 @@ namespace AliaaCommon
         {
             if (CHAR_MAPPING.ContainsKey(ch))
                 return CHAR_MAPPING[ch];
-            if (farsiNumbers && NUMBERS_MAPPING.ContainsKey(ch))
-                return NUMBERS_MAPPING[ch];
+            if (farsiNumbers)
+            {
+                if(NUMBERS_MAPPING.ContainsKey(ch))
+                    return NUMBERS_MAPPING[ch];
+            }
+            else
+            {
+                if(NUMBERS_MAPPING_REVERSE.ContainsKey(ch))
+                    return NUMBERS_MAPPING_REVERSE[ch];
+            }
             return ch;
         }
 
