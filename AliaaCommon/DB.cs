@@ -341,8 +341,11 @@ namespace AliaaCommon
                     IEnumerable array = value as IEnumerable;
                     foreach (var item in array)
                     {
-                        Type itemType = item.GetType();
-                        UnifyCharsInObject(itemType, item);
+                        if (item != null)
+                        {
+                            Type itemType = item.GetType();
+                            UnifyCharsInObject(itemType, item);
+                        }
                     }
                 }
             }
