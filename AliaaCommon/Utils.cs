@@ -142,7 +142,7 @@ namespace AliaaCommon
                     else if (p.PropertyType.IsEnum)
                         value = GetDisplayNameOfMember(p.PropertyType, value.ToString());
                     else if (value is DateTime && convertDateToPersian)
-                        value = GetDateString((DateTime)value, includeTimeInDates);
+                        value = GetPersianDateString((DateTime)value, includeTimeInDates);
                     else if (value is IEnumerable && !(value is string))
                     {
                         StringBuilder sb = new StringBuilder();
