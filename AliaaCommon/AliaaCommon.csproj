@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Compressor.cs" />
+    <Compile Include="DataTableFactory.cs" />
     <Compile Include="DB.cs" />
     <Compile Include="DisplayNameXAttribute.cs" />
     <Compile Include="HSLColor.cs" />
