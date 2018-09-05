@@ -36,12 +36,12 @@ namespace AliaaCommon
 
         private Dictionary<Type, MethodInfo> methods = new Dictionary<Type, MethodInfo>();
 
-        public DataTable Create<T>(bool convertDateToPersian = true, bool includeTimeInDates = true, string[] excludeColumns = null) where T : MongoEntity
+        public DataTable Create<T>(bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null) where T : MongoEntity
         {
-            return Create(DB<T>.GetAllAsEnumerable(), convertDateToPersian, includeTimeInDates, excludeColumns);
+            return Create(DB<T>.GetAllAsEnumerable(), convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns);
         }
 
-        public DataTable Create<T>(IEnumerable<T> data, bool convertDateToPersian = true, bool includeTimeInDates = true, string[] excludeColumns = null) where T : MongoEntity
+        public DataTable Create<T>(IEnumerable<T> data, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null) where T : MongoEntity
         {
             Type type = typeof(T);
             MethodInfo method;
@@ -53,15 +53,19 @@ namespace AliaaCommon
                 methods.Add(type, method);
             }
             if (method == null)
-                return CreateDataTable(new DataTable(), data, convertDateToPersian, includeTimeInDates, excludeColumns);
-            return (DataTable)method.Invoke(this, new object[] { data, convertDateToPersian, includeTimeInDates, excludeColumns });
+                return CreateDataTable(new DataTable(), data, convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns);
+            return (DataTable)method.Invoke(this, new object[] { data, convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns });
         }
 
-        private static Dictionary<PropertyInfo, string> CreateDataTableColumns<T>(DataTable table, bool convertDateToPersian = true, bool includeTimeInDates = true, string[] excludeColumns = null)
+        protected static string INDEX_COLUMN = "ردیف";
+
+        public static Dictionary<PropertyInfo, string> CreateDataTableColumns<T>(DataTable table, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null)
         {
-            Type ttype = typeof(T);
-            PropertyInfo[] props = ttype.GetProperties();
+            PropertyInfo[] props = typeof(T).GetProperties();
             Dictionary<PropertyInfo, string> displayNames = new Dictionary<PropertyInfo, string>();
+            if (addIndexColumn)
+                table.Columns.Add(INDEX_COLUMN, typeof(int));
+
             foreach (PropertyInfo p in props)
             {
                 if (excludeColumns != null)
@@ -100,15 +104,18 @@ namespace AliaaCommon
             return displayNames;
         }
 
-        public DataTable CreateDataTable<T>(DataTable table, IEnumerable<T> list, bool convertDateToPersian = true, bool includeTimeInDates = true, string[] excludeColumns = null)
+        public DataTable CreateDataTable<T>(DataTable table, IEnumerable<T> list, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null)
         {
             if (list == null)
                 return null;
-            Dictionary<PropertyInfo, string> displayNames = CreateDataTableColumns<T>(table, convertDateToPersian, includeTimeInDates, excludeColumns);
+            Dictionary<PropertyInfo, string> displayNames = CreateDataTableColumns<T>(table, convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns);
 
+            int i = 1;
             foreach (T item in list)
             {
                 DataRow row = table.NewRow();
+                if (addIndexColumn)
+                    row[INDEX_COLUMN] = i++;
                 foreach (PropertyInfo p in displayNames.Keys)
                 {
                     object value = p.GetValue(item);
@@ -124,11 +131,11 @@ namespace AliaaCommon
                     {
                         StringBuilder sb = new StringBuilder();
                         Type itemsType = null;
-                        foreach (var i in (IEnumerable)value)
+                        foreach (var v in (IEnumerable)value)
                         {
                             if (itemsType == null)
-                                itemsType = i.GetType();
-                            sb.Append(Utils.GetDisplayNameOfMember(itemsType, i.ToString())).Append(" ; ");
+                                itemsType = v.GetType();
+                            sb.Append(Utils.GetDisplayNameOfMember(itemsType, v.ToString())).Append(" ; ");
                         }
                         if (sb.Length > 3)
                             sb.Remove(sb.Length - 3, 3);

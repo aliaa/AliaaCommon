@@ -169,10 +169,8 @@ namespace AliaaCommon.WebControls
         {
             if (obj == null)
                 return;
-            Type type = typeof(T);
-            foreach (PropertyInfo prop in type.GetProperties())
+            foreach (PropertyInfo prop in typeof(T).GetProperties())
             {
-                Type ptype = prop.PropertyType;
                 Control ctrl = GetControl(prop.Name);
                 if (ctrl == null)
                     continue;
@@ -180,7 +178,7 @@ namespace AliaaCommon.WebControls
                 if (overrideTypes != null && overrideTypes.ContainsKey(prop.Name))
                     controlType = overrideTypes[prop.Name];
                 else
-                    controlType = GetControlType(ptype);
+                    controlType = GetControlType(prop.PropertyType);
                 if (controlType == ControlType.Unknown)
                     continue;
                 object value = prop.GetValue(obj);
@@ -214,8 +212,7 @@ namespace AliaaCommon.WebControls
         {
             if (obj == null)
                 return;
-            Type type = typeof(T);
-            foreach (PropertyInfo prop in type.GetProperties())
+            foreach (PropertyInfo prop in typeof(T).GetProperties())
             {
                 Type ptype = prop.PropertyType;
                 Control ctrl = GetControl(prop.Name);

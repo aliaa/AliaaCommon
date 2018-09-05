@@ -69,16 +69,20 @@
   <ItemGroup>
     <Compile Include="Compressor.cs" />
     <Compile Include="DataTableFactory.cs" />
-    <Compile Include="DB.cs" />
+    <Compile Include="MongoDB\CollectionOptionsAttribute.cs" />
+    <Compile Include="MongoDB\CollectionSaveAttribute.cs" />
+    <Compile Include="MongoDB\DB.cs" />
     <Compile Include="DisplayNameXAttribute.cs" />
     <Compile Include="HSLColor.cs" />
     <Compile Include="HttpHeadersCleanup.cs" />
     <Compile Include="License.cs" />
     <Compile Include="Models\AuthUser.cs" />
+    <Compile Include="MongoDB\MongoEntity.cs" />
+    <Compile Include="MongoDB\MongoIndexAttribute.cs" />
     <Compile Include="ObjectIdJsonConverter.cs" />
     <Compile Include="PersianCharacters.cs" />
     <Compile Include="TimeSpanJsonConverter.cs" />
-    <Compile Include="UserActivity.cs" />
+    <Compile Include="Models\UserActivity.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WebControls\ObjectEditorUI.ascx.cs">

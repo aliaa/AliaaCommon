@@ -7,9 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace AliaaCommon
+namespace AliaaCommon.Models
 {
-    [CollectionName("ActivityLogs")]
+    [CollectionOptions(Name = "ActivityLogs", Capped = true, MaxSize = 100000000)]
     [CollectionSave(WriteLog = false, UnifyChars = false, UnifyNumbers = false)]
     public class UserActivity : MongoEntity
     {

@@ -75,9 +75,16 @@ namespace AliaaCommon
 
         public static string GetPersianDateString(DateTime date, bool includeTime = true)
         {
-            if (includeTime)
-                return PersianDateConverter.ToPersianDate(date).ToString();
-            return PersianDateConverter.ToPersianDate(date).ToString("yy/mm/dd");
+            try
+            {
+                if (includeTime)
+                    return PersianDateConverter.ToPersianDate(date).ToString();
+                return PersianDateConverter.ToPersianDate(date).ToString("yy/mm/dd");
+            }
+            catch
+            {
+                return null;
+            }
         }
         
 
@@ -107,7 +114,6 @@ namespace AliaaCommon
 
         public static string GetDisplayNameOfMember<TClass>(Expression<Func<TClass, object>> p)
         {
-            Type classType = typeof(TClass);
             string memberName;
             if (p.Body is MemberExpression)
                 memberName = ((MemberExpression)p.Body).Member.Name;
@@ -115,7 +121,7 @@ namespace AliaaCommon
                 memberName = ((p.Body as UnaryExpression).Operand as MemberExpression).Member.Name;
             else
                 throw new NotImplementedException();
-            return GetDisplayNameOfMember(classType, memberName);
+            return GetDisplayNameOfMember(typeof(TClass), memberName);
         }
 
 
@@ -316,14 +322,12 @@ namespace AliaaCommon
             DateTime dt = p.ToDateTime(year, month, day, hour, minute, second, 0, 0);
             return DateTime.SpecifyKind(dt, DateTimeKind.Utc);
         }
-
-        private static readonly Type DateTimeType = typeof(DateTime);
+        
         public static void CorrectPersianDateTimes<T>(T obj)
         {
-            Type type = typeof(T);
-            foreach (PropertyInfo p in type.GetProperties())
+            foreach (PropertyInfo p in typeof(T).GetProperties())
             {
-                if (p.PropertyType.IsEquivalentTo(DateTimeType))
+                if (p.PropertyType.IsEquivalentTo(typeof(DateTime)))
                 {
                     DateTime dt = (DateTime)p.GetValue(obj);
                     if (dt.Year < 2000 && dt.Year > 1000)

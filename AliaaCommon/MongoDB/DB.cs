@@ -1,155 +1,19 @@
-﻿using MongoDB.Bson;
+﻿using AliaaCommon.Models;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson.Serialization.Options;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
-using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AliaaCommon
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
-    public class CollectionNameAttribute : Attribute
-    {
-        public string CollectionName { get; private set; }
-
-        public CollectionNameAttribute(string collectionName)
-        {
-            this.CollectionName = collectionName;
-        }
-    }
-
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public class CollectionSaveAttribute : Attribute
-    {
-        public bool WriteLog { get; set; }
-        public bool UnifyChars { get; set; }
-        public bool UnifyNumbers { get; set; }
-
-        public CollectionSaveAttribute(bool WriteLog = true, bool UnifyChars = true, bool UnifyNumbers = false)
-        {
-            this.WriteLog = WriteLog;
-            this.UnifyChars = UnifyChars;
-            this.UnifyNumbers = UnifyNumbers;
-        }
-    }
-    public enum MongoIndexType
-    {
-        Acsending,
-        Descending,
-        Geo2D,
-        Geo2DSphere,
-        Text,
-        Hashed
-    }
-
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
-    public class MongoIndexAttribute : Attribute
-    {
-        private string[] Fields;
-        private MongoIndexType[] Types;
-
-        public bool Unique { get; set; } = false;
-        public bool Sparse { get; set; } = false;
-
-        public MongoIndexAttribute(string[] Fields, MongoIndexType[] Types = null)
-        {
-            if (Fields == null || Fields.Length == 0)
-                throw new Exception();
-            this.Fields = Fields;
-            this.Types = Types;
-        }
-
-        public MongoIndexAttribute(string IndexDefinition)
-        {
-            BsonDocument doc = BsonDocument.Parse(IndexDefinition);
-            List<string> fieldsList = new List<string>(doc.ElementCount);
-            List<MongoIndexType> typesList = new List<MongoIndexType>(doc.ElementCount);
-            foreach (var elem in doc.Elements)
-            {
-                fieldsList.Add(elem.Name);
-                if (elem.Value.IsInt32)
-                {
-                    if (elem.Value.AsInt32 == -1)
-                        typesList.Add(MongoIndexType.Descending);
-                    else
-                        typesList.Add(MongoIndexType.Acsending);
-                }
-                else
-                {
-                    switch (elem.Value.AsString.ToLower())
-                    {
-                        case "2d":
-                            typesList.Add(MongoIndexType.Geo2D);
-                            break;
-                        case "2dsphere":
-                            typesList.Add(MongoIndexType.Geo2DSphere);
-                            break;
-                        case "text":
-                            typesList.Add(MongoIndexType.Text);
-                            break;
-                        case "hashed":
-                            typesList.Add(MongoIndexType.Hashed);
-                            break;
-                        default:
-                            throw new Exception("unkonwn index type!");
-                    }
-                }
-            }
-            Fields = fieldsList.ToArray();
-            Types = typesList.ToArray();
-        }
-
-        public IndexKeysDefinition<T> GetIndexKeysDefinition<T>()
-        {
-            if (Fields.Length == 1)
-                return GetIndexDefForOne<T>(Fields[0], Types != null && Types.Length > 0 ? Types[0] : MongoIndexType.Acsending);
-
-            List<IndexKeysDefinition<T>> list = new List<IndexKeysDefinition<T>>(Fields.Length);
-            for (int i = 0; i < Fields.Length; i++)
-                list.Add(GetIndexDefForOne<T>(Fields[i], Types != null && Fields.Length > i ? Types[i] : MongoIndexType.Acsending));
-            return Builders<T>.IndexKeys.Combine(list);
-        }
-
-        private static IndexKeysDefinition<T> GetIndexDefForOne<T>(string field, MongoIndexType type)
-        {
-            switch (type)
-            {
-                case MongoIndexType.Acsending:
-                    return Builders<T>.IndexKeys.Ascending(field);
-                case MongoIndexType.Descending:
-                    return Builders<T>.IndexKeys.Descending(field);
-                case MongoIndexType.Geo2D:
-                    return Builders<T>.IndexKeys.Geo2D(field);
-                case MongoIndexType.Geo2DSphere:
-                    return Builders<T>.IndexKeys.Geo2DSphere(field);
-                case MongoIndexType.Text:
-                    return Builders<T>.IndexKeys.Text(field);
-                case MongoIndexType.Hashed:
-                    return Builders<T>.IndexKeys.Hashed(field);
-                default:
-                    throw new Exception();
-            }
-        }
-    }
-
-    [Serializable]
-    public abstract class MongoEntity
-    {
-        [JsonConverter(typeof(ObjectIdJsonConverter))]
-        [BsonId]
-        public ObjectId Id { get; set; }
-    }
-
     public static class DB<T> where T : MongoEntity
     {
         private static readonly string DEFAULT_CONN_STRING = ConfigurationManager.AppSettings["MongoConnString"];
@@ -212,10 +76,10 @@ namespace AliaaCommon
                 {
                     string dbName = customConnection.Substring(0, customConnection.IndexOf(";")).Trim();
                     string connString = customConnection.Substring(customConnection.IndexOf(";") + 1).Trim();
-                    collection = GetDatabase(connString, dbName).GetCollection<T>(collectionName);
+                    collection = GetCollection(GetDatabase(connString, dbName));
                 }
                 else
-                    collection = GetDefaultDatabase().GetCollection<T>(collectionName);
+                    collection = GetCollection(GetDefaultDatabase());
 
                 SetIndexes(collection);
                 try
@@ -227,33 +91,60 @@ namespace AliaaCommon
             }
         }
 
-        public static IMongoCollection<T> GetCollection(string collectionName)
+        private static IMongoCollection<T> GetCollection(IMongoDatabase db)
         {
-            return GetCollection(DEFAULT_CONN_STRING, DEFAULT_DB_NAME, collectionName);
+            CollectionOptionsAttribute attr = (CollectionOptionsAttribute)Attribute.GetCustomAttribute(typeof(T), typeof(CollectionOptionsAttribute));
+            string collectionName = attr.Name ?? typeof(T).Name;
+            if (attr != null && !CheckCollectionExists(db, collectionName))
+            {
+                CreateCollectionOptions options = new CreateCollectionOptions();
+                if(attr.Capped)
+                {
+                    options.Capped = attr.Capped;
+                    if (attr.MaxSize > 0)
+                        options.MaxSize = attr.MaxSize;
+                    if (attr.MaxDocuments > 0)
+                        options.MaxDocuments = attr.MaxDocuments;
+                }
+                db.CreateCollection(collectionName, options);
+            }
+            return db.GetCollection<T>(collectionName);
         }
 
-        public static IMongoCollection<T> GetCollection(string dbName, string collectionName)
+        private static bool CheckCollectionExists(IMongoDatabase db, string collectionName)
         {
-            return GetCollection(DEFAULT_CONN_STRING, dbName, collectionName);
+            var filter = new BsonDocument("name", collectionName);
+            var collectionCursor = db.ListCollections(new ListCollectionsOptions { Filter = filter });
+            return collectionCursor.Any();
         }
 
-        public static IMongoCollection<T> GetCollection(string connString, string dbName, string collectionName)
-        {
-            IMongoCollection<T> collection = GetDatabase(connString, dbName).GetCollection<T>(collectionName);
-            SetIndexes(collection);
-            //try
-            //{
-            //    Collections.Add(typeof(T), collection);
-            //}
-            //catch { }
-            return collection;
-        }
+        //public static IMongoCollection<T> GetCollection(string collectionName)
+        //{
+        //    return GetCollection(DEFAULT_CONN_STRING, DEFAULT_DB_NAME, collectionName);
+        //}
+
+        //public static IMongoCollection<T> GetCollection(string dbName, string collectionName)
+        //{
+        //    return GetCollection(DEFAULT_CONN_STRING, dbName, collectionName);
+        //}
+
+        //public static IMongoCollection<T> GetCollection(string connString, string dbName, string collectionName)
+        //{
+        //    IMongoCollection<T> collection = GetDatabase(connString, dbName).GetCollection<T>(collectionName);
+        //    SetIndexes(collection);
+        //    //try
+        //    //{
+        //    //    Collections.Add(typeof(T), collection);
+        //    //}
+        //    //catch { }
+        //    return collection;
+        //}
 
         private static string GetCollectionName(Type ttype)
         {
-            CollectionNameAttribute attr = (CollectionNameAttribute)Attribute.GetCustomAttribute(ttype, typeof(CollectionNameAttribute));
+            CollectionOptionsAttribute attr = (CollectionOptionsAttribute)Attribute.GetCustomAttribute(ttype, typeof(CollectionOptionsAttribute));
             if (attr != null)
-                return attr.CollectionName;
+                return attr.Name;
             return ttype.Name;
         }
 
@@ -261,7 +152,10 @@ namespace AliaaCommon
         {
             foreach (MongoIndexAttribute attr in typeof(T).GetCustomAttributes<MongoIndexAttribute>())
             {
-                collection.Indexes.CreateOne(attr.GetIndexKeysDefinition<T>(), new CreateIndexOptions { Sparse = attr.Sparse, Unique = attr.Unique });
+                var options = new CreateIndexOptions { Sparse = attr.Sparse, Unique = attr.Unique };
+                if (attr.ExpireAfterSeconds > 0)
+                    options.ExpireAfter = new TimeSpan(attr.ExpireAfterSeconds * 10000000);
+                collection.Indexes.CreateOne(attr.GetIndexKeysDefinition<T>(), options);
             }
         }
 
@@ -269,15 +163,13 @@ namespace AliaaCommon
         {
             return Collection.Find(t => t.Id == id).FirstOrDefault();
         }
-
-        private static readonly Type collSaveType = typeof(CollectionSaveAttribute);
+        
         public static void Save(T entity)
         {
-            Type ttype = typeof(T);
             bool writeLog = writeLogDefaultValue;
             bool unifyChars = unifyCharsDefaultValue;
             bool unifyNums = unifyNumsDefaultValue;
-            CollectionSaveAttribute attr = (CollectionSaveAttribute)Attribute.GetCustomAttribute(ttype, collSaveType);
+            CollectionSaveAttribute attr = (CollectionSaveAttribute)Attribute.GetCustomAttribute(typeof(T), typeof(CollectionSaveAttribute));
             if (attr != null)
             {
                 writeLog = attr.WriteLog;
@@ -286,7 +178,7 @@ namespace AliaaCommon
             }
 
             if (unifyChars)
-                UnifyCharsInObject(ttype, entity, unifyNums);
+                UnifyCharsInObject(typeof(T), entity, unifyNums);
 
             ActivityType activityType;
             if (entity.Id == ObjectId.Empty)
@@ -300,11 +192,9 @@ namespace AliaaCommon
                 activityType = ActivityType.Update;
             }
             if (writeLog)
-                DB<UserActivity>.Save(new UserActivity(activityType, GetCollectionName(ttype), entity));
+                DB<UserActivity>.Save(new UserActivity(activityType, GetCollectionName(typeof(T)), entity));
         }
-
-        private static readonly Type STRING_TYPE = typeof(string);
-        private static readonly Type MONGO_ENTITIY_TYPE = typeof(MongoEntity);
+        
         private static void UnifyCharsInObject(Type entityType, object entity, bool farsiNumbers = false)
         {
             foreach (PropertyInfo p in entityType.GetProperties())
@@ -317,7 +207,7 @@ namespace AliaaCommon
                 catch { continue; }
                 if (value == null)
                     continue;
-                if (p.PropertyType.IsEquivalentTo(STRING_TYPE))
+                if (p.PropertyType.IsEquivalentTo(typeof(string)))
                 {
                     if (!p.CanRead || !p.CanWrite)
                         continue;
@@ -332,7 +222,7 @@ namespace AliaaCommon
                         catch { continue; }
                     }
                 }
-                else if (p.PropertyType.IsSubclassOf(MONGO_ENTITIY_TYPE))
+                else if (p.PropertyType.IsSubclassOf(typeof(MongoEntity)))
                 {
                     UnifyCharsInObject(p.PropertyType, p.GetValue(entity));
                 }
@@ -340,13 +230,8 @@ namespace AliaaCommon
                 {
                     IEnumerable array = value as IEnumerable;
                     foreach (var item in array)
-                    {
                         if (item != null)
-                        {
-                            Type itemType = item.GetType();
-                            UnifyCharsInObject(itemType, item);
-                        }
-                    }
+                            UnifyCharsInObject(item.GetType(), item);
                 }
             }
         }
@@ -356,7 +241,7 @@ namespace AliaaCommon
             Collection.DeleteOne(t => t.Id == obj.Id);
 
             bool writeLog = writeLogDefaultValue;
-            CollectionSaveAttribute attr = (CollectionSaveAttribute)Attribute.GetCustomAttribute(typeof(T), collSaveType);
+            CollectionSaveAttribute attr = (CollectionSaveAttribute)Attribute.GetCustomAttribute(typeof(T), typeof(CollectionSaveAttribute));
             if (attr != null)
                 writeLog = attr.WriteLog;
             if (writeLog)
@@ -366,7 +251,7 @@ namespace AliaaCommon
         public static void Delete(ObjectId Id)
         {
             bool writeLog = writeLogDefaultValue;
-            CollectionSaveAttribute attr = (CollectionSaveAttribute)Attribute.GetCustomAttribute(typeof(T), collSaveType);
+            CollectionSaveAttribute attr = (CollectionSaveAttribute)Attribute.GetCustomAttribute(typeof(T), typeof(CollectionSaveAttribute));
             if (attr != null)
                 writeLog = attr.WriteLog;
             if(writeLog)
@@ -424,11 +309,10 @@ namespace AliaaCommon
         public class CustomSerializationProvider : IBsonSerializationProvider
         {
             static LocalDateTimeSerializer dateTimeSerializer = new LocalDateTimeSerializer();
-            static Type dateTimeType = typeof(DateTime);
 
             public IBsonSerializer GetSerializer(Type type)
             {
-                if (type == dateTimeType)
+                if (type == typeof(DateTime))
                     return dateTimeSerializer;
 
                 return null; // falls back to Mongo defaults
