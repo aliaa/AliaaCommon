@@ -16,29 +16,21 @@ namespace AliaaCommon
 {
     public static class DB<T> where T : MongoEntity
     {
-        private static readonly string DEFAULT_CONN_STRING = ConfigurationManager.AppSettings["MongoConnString"];
-        private static readonly string DEFAULT_DB_NAME = ConfigurationManager.AppSettings["DBName"];
-        private static readonly bool DONT_SET_DICTIONARY_CONVENTION_TO_ARRAY_OF_DOCUMENTS = ConfigurationManager.AppSettings["setDictionaryConventionToArrayOfDocuments"] == "false";
-
-        public static bool writeLogDefaultValue = true, unifyCharsDefaultValue = true, unifyNumsDefaultValue;
-
-        private static IMongoDatabase defaultDB = null;
-
         /// <summary>
         /// Gets DataBase object with values of written in App.config or Web.config for connection string ("MongoConnString") and database name ("DBName")
         /// </summary>
         /// <returns></returns>
         public static IMongoDatabase GetDefaultDatabase()
         {
-            if (defaultDB != null)
-                return defaultDB;
-            defaultDB = GetDatabase(DEFAULT_CONN_STRING, DEFAULT_DB_NAME);
-            return defaultDB;
+            if (DBStatics.DefaultDB != null)
+                return DBStatics.DefaultDB;
+            DBStatics.DefaultDB = GetDatabase(DBStatics.DEFAULT_CONN_STRING, DBStatics.DEFAULT_DB_NAME);
+            return DBStatics.DefaultDB;
         }
 
         public static IMongoDatabase GetDatabase(string connString, string dbName)
         {
-            return GetDatabase(connString, dbName, !DONT_SET_DICTIONARY_CONVENTION_TO_ARRAY_OF_DOCUMENTS);
+            return GetDatabase(connString, dbName, !DBStatics.DONT_SET_DICTIONARY_CONVENTION_TO_ARRAY_OF_DOCUMENTS);
         }
 
         public static IMongoDatabase GetDatabase(string connString, string dbName, bool setDictionaryConventionToArrayOfDocuments)
@@ -66,8 +58,8 @@ namespace AliaaCommon
             get
             {
                 string collectionName = GetCollectionName(typeof(T));
-                if (CollectionPool.Exists(collectionName))
-                    return CollectionPool.Get<T>(collectionName);
+                if (DBStatics.Collections.ContainsKey(collectionName))
+                    return (IMongoCollection<T>)DBStatics.Collections[collectionName];
 
                 IMongoCollection<T> collection;
                 string customConnection = ConfigurationManager.AppSettings["MongodbCustomConnection_" + collectionName];
@@ -83,7 +75,7 @@ namespace AliaaCommon
                 SetIndexes(collection);
                 try
                 {
-                    CollectionPool.Add(collectionName, collection);
+                    DBStatics.Collections.Add(collectionName, collection);
                 }
                 catch { }
                 return collection;
@@ -163,9 +155,9 @@ namespace AliaaCommon
         
         public static void Save(T entity)
         {
-            bool writeLog = writeLogDefaultValue;
-            bool unifyChars = unifyCharsDefaultValue;
-            bool unifyNums = unifyNumsDefaultValue;
+            bool writeLog = DBStatics.WriteLogDefaultValue;
+            bool unifyChars = DBStatics.UnifyCharsDefaultValue;
+            bool unifyNums = DBStatics.UnifyNumsDefaultValue;
             CollectionSaveAttribute attr = (CollectionSaveAttribute)Attribute.GetCustomAttribute(typeof(T), typeof(CollectionSaveAttribute));
             if (attr != null)
             {
@@ -237,7 +229,7 @@ namespace AliaaCommon
         {
             Collection.DeleteOne(t => t.Id == obj.Id);
 
-            bool writeLog = writeLogDefaultValue;
+            bool writeLog = DBStatics.WriteLogDefaultValue;
             CollectionSaveAttribute attr = (CollectionSaveAttribute)Attribute.GetCustomAttribute(typeof(T), typeof(CollectionSaveAttribute));
             if (attr != null)
                 writeLog = attr.WriteLog;
@@ -247,7 +239,7 @@ namespace AliaaCommon
         
         public static void Delete(ObjectId Id)
         {
-            bool writeLog = writeLogDefaultValue;
+            bool writeLog = DBStatics.WriteLogDefaultValue;
             CollectionSaveAttribute attr = (CollectionSaveAttribute)Attribute.GetCustomAttribute(typeof(T), typeof(CollectionSaveAttribute));
             if (attr != null)
                 writeLog = attr.WriteLog;
