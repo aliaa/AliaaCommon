@@ -23,7 +23,6 @@ namespace AliaaCommon
         public static bool writeLogDefaultValue = true, unifyCharsDefaultValue = true, unifyNumsDefaultValue;
 
         private static IMongoDatabase defaultDB = null;
-        private static Dictionary<string, object> Collections = new Dictionary<string, object>();
 
         /// <summary>
         /// Gets DataBase object with values of written in App.config or Web.config for connection string ("MongoConnString") and database name ("DBName")
@@ -67,8 +66,8 @@ namespace AliaaCommon
             get
             {
                 string collectionName = GetCollectionName(typeof(T));
-                if (Collections.ContainsKey(collectionName))
-                    return Collections[collectionName] as IMongoCollection<T>;
+                if (CollectionPool.Exists(collectionName))
+                    return CollectionPool.Get<T>(collectionName);
 
                 IMongoCollection<T> collection;
                 string customConnection = ConfigurationManager.AppSettings["MongodbCustomConnection_" + collectionName];
@@ -84,7 +83,7 @@ namespace AliaaCommon
                 SetIndexes(collection);
                 try
                 {
-                    Collections.Add(collectionName, collection);
+                    CollectionPool.Add(collectionName, collection);
                 }
                 catch { }
                 return collection;
@@ -94,7 +93,7 @@ namespace AliaaCommon
         private static IMongoCollection<T> GetCollection(IMongoDatabase db)
         {
             CollectionOptionsAttribute attr = (CollectionOptionsAttribute)Attribute.GetCustomAttribute(typeof(T), typeof(CollectionOptionsAttribute));
-            string collectionName = attr.Name ?? typeof(T).Name;
+            string collectionName = attr?.Name ?? typeof(T).Name;
             if (attr != null && !CheckCollectionExists(db, collectionName))
             {
                 CreateCollectionOptions options = new CreateCollectionOptions();
@@ -143,9 +142,7 @@ namespace AliaaCommon
         private static string GetCollectionName(Type ttype)
         {
             CollectionOptionsAttribute attr = (CollectionOptionsAttribute)Attribute.GetCustomAttribute(ttype, typeof(CollectionOptionsAttribute));
-            if (attr != null)
-                return attr.Name;
-            return ttype.Name;
+            return attr?.Name ?? ttype.Name;
         }
 
         private static void SetIndexes(IMongoCollection<T> collection)
