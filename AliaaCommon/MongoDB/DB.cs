@@ -167,7 +167,7 @@ namespace AliaaCommon
             }
 
             if (unifyChars)
-                UnifyCharsInObject(typeof(T), entity, unifyNums);
+                PersianCharacters.UnifyStringsInObject(typeof(T), entity, unifyNums);
 
             ActivityType activityType;
             if (entity.Id == ObjectId.Empty)
@@ -182,47 +182,6 @@ namespace AliaaCommon
             }
             if (writeLog)
                 DB<UserActivity>.Save(new UserActivity(activityType, GetCollectionName(typeof(T)), entity));
-        }
-        
-        private static void UnifyCharsInObject(Type entityType, object entity, bool farsiNumbers = false)
-        {
-            foreach (PropertyInfo p in entityType.GetProperties())
-            {
-                object value;
-                try
-                {
-                    value = p.GetValue(entity);
-                }
-                catch { continue; }
-                if (value == null)
-                    continue;
-                if (p.PropertyType.IsEquivalentTo(typeof(string)))
-                {
-                    if (!p.CanRead || !p.CanWrite)
-                        continue;
-                    string original = value as string;
-                    string unified = PersianCharacters.UnifyString(original, farsiNumbers);
-                    if (original != unified)
-                    {
-                        try
-                        {
-                            p.SetValue(entity, unified);
-                        }
-                        catch { continue; }
-                    }
-                }
-                else if (p.PropertyType.IsSubclassOf(typeof(MongoEntity)))
-                {
-                    UnifyCharsInObject(p.PropertyType, p.GetValue(entity));
-                }
-                else if (value is IEnumerable)
-                {
-                    IEnumerable array = value as IEnumerable;
-                    foreach (var item in array)
-                        if (item != null)
-                            UnifyCharsInObject(item.GetType(), item);
-                }
-            }
         }
 
         public static void Delete(T obj)

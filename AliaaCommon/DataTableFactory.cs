@@ -68,20 +68,8 @@ namespace AliaaCommon
 
             foreach (PropertyInfo p in props)
             {
-                if (excludeColumns != null)
-                {
-                    bool exclude = false;
-                    foreach (string exCol in excludeColumns)
-                    {
-                        if (p.Name == exCol)
-                        {
-                            exclude = true;
-                            break;
-                        }
-                    }
-                    if (exclude)
-                        continue;
-                }
+                if (excludeColumns != null && excludeColumns.Contains(p.Name))
+                    continue;
                 string dispName = Utils.GetDisplayNameOfMember(p);
                 displayNames.Add(p, dispName);
                 if (table.Columns.Contains(dispName))

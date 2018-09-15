@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Web;
 
@@ -443,6 +445,47 @@ namespace AliaaCommon
                 sb.Append(ConvertPersianDigitToEnglish(ch));
             }
             return sb.ToString();
+        }
+
+        public static void UnifyStringsInObject(Type entityType, object entity, bool farsiNumbers = false)
+        {
+            foreach (PropertyInfo p in entityType.GetProperties())
+            {
+                object value;
+                try
+                {
+                    value = p.GetValue(entity);
+                }
+                catch { continue; }
+                if (value == null)
+                    continue;
+                if (p.PropertyType.IsEquivalentTo(typeof(string)))
+                {
+                    if (!p.CanRead || !p.CanWrite)
+                        continue;
+                    string original = value as string;
+                    string unified = UnifyString(original, farsiNumbers);
+                    if (original != unified)
+                    {
+                        try
+                        {
+                            p.SetValue(entity, unified);
+                        }
+                        catch { continue; }
+                    }
+                }
+                else if (p.PropertyType.IsSubclassOf(typeof(MongoEntity)))
+                {
+                    UnifyStringsInObject(p.PropertyType, p.GetValue(entity), farsiNumbers);
+                }
+                else if (value is IEnumerable)
+                {
+                    IEnumerable array = value as IEnumerable;
+                    foreach (var item in array)
+                        if (item != null)
+                            UnifyStringsInObject(item.GetType(), item, farsiNumbers);
+                }
+            }
         }
     }
 }
