@@ -222,10 +222,7 @@ namespace AliaaCommon
 
         public static Dictionary<ObjectId, T> GetAllAsDictionary()
         {
-            Dictionary<ObjectId, T> dic = new Dictionary<ObjectId, T>();
-            foreach (T item in Collection.Find(Builders<T>.Filter.Empty).ToEnumerable())
-                dic.Add(item.Id, item);
-            return dic;
+            return Collection.Find(Builders<T>.Filter.Empty).ToEnumerable().ToDictionary((T t) => { return t.Id; });
         }
 
         class DictionaryRepresentationConvention : ConventionBase, IMemberMapConvention
