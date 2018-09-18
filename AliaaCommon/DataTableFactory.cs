@@ -41,7 +41,7 @@ namespace AliaaCommon
             return Create(DB<T>.GetAllAsEnumerable(), convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns);
         }
 
-        public DataTable Create<T>(IEnumerable<T> data, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null) where T : MongoEntity
+        public DataTable Create<T>(IEnumerable<T> data, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null)
         {
             Type type = typeof(T);
             MethodInfo method;
