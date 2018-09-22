@@ -38,7 +38,7 @@ namespace AliaaCommon
 
         public DataTable Create<T>(bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null) where T : MongoEntity
         {
-            return Create(DB<T>.GetAllAsEnumerable(), convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns);
+            return Create(DB<T>.All(), convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns);
         }
 
         public DataTable Create<T>(IEnumerable<T> data, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null)

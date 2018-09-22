@@ -209,22 +209,12 @@ namespace AliaaCommon
             }
             Collection.DeleteOne(t => t.Id == Id);
         }
-
-        public static List<T> GetAllAsList()
-        {
-            return Collection.Find(FilterDefinition<T>.Empty).ToList();
-        }
-
-        public static IEnumerable<T> GetAllAsEnumerable()
+        
+        public static IEnumerable<T> All()
         {
             return Collection.Find(FilterDefinition<T>.Empty).ToEnumerable();
         }
-
-        public static Dictionary<ObjectId, T> GetAllAsDictionary()
-        {
-            return Collection.Find(Builders<T>.Filter.Empty).ToEnumerable().ToDictionary(t => t.Id);
-        }
-
+        
         class DictionaryRepresentationConvention : ConventionBase, IMemberMapConvention
         {
             private readonly DictionaryRepresentation _dictionaryRepresentation;
