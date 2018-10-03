@@ -10,6 +10,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace AliaaCommon
@@ -213,6 +214,11 @@ namespace AliaaCommon
         public static IEnumerable<T> All()
         {
             return Collection.Find(FilterDefinition<T>.Empty).ToEnumerable();
+        }
+
+        public static bool Any(Expression<Func<T, bool>> filter)
+        {
+            return Collection.Find(filter).Project(t => t.Id).FirstOrDefault() != ObjectId.Empty;
         }
         
         class DictionaryRepresentationConvention : ConventionBase, IMemberMapConvention

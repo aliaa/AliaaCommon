@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -72,7 +73,7 @@ namespace AliaaCommon.Models
                 hash = password;
             else
                 hash = GetHash(password);
-            return collection.Count(u => u.Username == username && u.HashedPassword == hash && u.Disabled != true) > 0;
+            return DB<AuthUser>.Any(u => u.Username == username && u.HashedPassword == hash && u.Disabled != true);
         }
 
         public static AuthUser GetByUsername(this IMongoCollection<AuthUser> collection, string username)
