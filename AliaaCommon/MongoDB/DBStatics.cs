@@ -12,9 +12,9 @@ namespace AliaaCommon
     {
         public static bool WriteLogDefaultValue = true, UnifyCharsDefaultValue = true, UnifyNumsDefaultValue;
 
-        internal static readonly string DEFAULT_CONN_STRING = ConfigurationManager.AppSettings["MongoConnString"];
-        internal static readonly string DEFAULT_DB_NAME = ConfigurationManager.AppSettings["DBName"];
-        internal static readonly bool DONT_SET_DICTIONARY_CONVENTION_TO_ARRAY_OF_DOCUMENTS = ConfigurationManager.AppSettings["setDictionaryConventionToArrayOfDocuments"] == "false";
+        public static string DEFAULT_CONN_STRING = ConfigurationManager.AppSettings["MongoConnString"];
+        public static string DEFAULT_DB_NAME = ConfigurationManager.AppSettings["DBName"];
+        public static bool DONT_SET_DICTIONARY_CONVENTION_TO_ARRAY_OF_DOCUMENTS = ConfigurationManager.AppSettings["setDictionaryConventionToArrayOfDocuments"] == "false";
 
         internal static IMongoDatabase DefaultDB = null;
         internal static Dictionary<string, object> Collections = new Dictionary<string, object>();
