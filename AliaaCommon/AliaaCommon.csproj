@@ -82,6 +82,11 @@
     <Compile Include="MongoDB\MongoIndexAttribute.cs" />
     <Compile Include="ObjectIdJsonConverter.cs" />
     <Compile Include="PersianCharacters.cs" />
+    <Compile Include="Pipelining\PipelineEndTask.cs" />
+    <Compile Include="Pipelining\PipelineMiddleTask.cs" />
+    <Compile Include="Pipelining\Pipeliner.cs" />
+    <Compile Include="Pipelining\PipelineStartingTask.cs" />
+    <Compile Include="Pipelining\PipelineTask.cs" />
     <Compile Include="TimeSpanJsonConverter.cs" />
     <Compile Include="Models\UserActivity.cs" />
     <Compile Include="Utils.cs" />

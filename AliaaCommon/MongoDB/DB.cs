@@ -153,6 +153,11 @@ namespace AliaaCommon
         {
             return Collection.Find(t => t.Id == id).FirstOrDefault();
         }
+
+        public static T FindById(string id)
+        {
+            return FindById(ObjectId.Parse(id));
+        }
         
         public static void Save(T entity)
         {
