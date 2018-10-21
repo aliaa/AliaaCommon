@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,6 +20,7 @@ namespace AliaaCommon
 
         internal static IMongoDatabase DefaultDB = null;
         internal static Dictionary<string, object> Collections = new Dictionary<string, object>();
-        
+
+        public static string EXECUTION_PATH = Path.GetDirectoryName(Assembly.GetAssembly(typeof(DBStatics)).Location);
     }
 }

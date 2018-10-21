@@ -17,6 +17,8 @@ namespace AliaaCommon
 {
     public static class DB<T> where T : MongoEntity
     {
+        private static PersianCharacters persianCharacters = new PersianCharacters(DBStatics.EXECUTION_PATH);
+
         /// <summary>
         /// Gets DataBase object with values of written in App.config or Web.config for connection string ("MongoConnString") and database name ("DBName")
         /// </summary>
@@ -145,7 +147,8 @@ namespace AliaaCommon
                 var options = new CreateIndexOptions { Sparse = attr.Sparse, Unique = attr.Unique };
                 if (attr.ExpireAfterSeconds > 0)
                     options.ExpireAfter = new TimeSpan(attr.ExpireAfterSeconds * 10000000);
-                collection.Indexes.CreateOne(attr.GetIndexKeysDefinition<T>(), options);
+                CreateIndexModel<T> model = new CreateIndexModel<T>(attr.GetIndexKeysDefinition<T>(), options);
+                collection.Indexes.CreateOne(model);
             }
         }
 
@@ -173,7 +176,7 @@ namespace AliaaCommon
             }
 
             if (unifyChars)
-                PersianCharacters.UnifyStringsInObject(typeof(T), entity, unifyNums);
+                persianCharacters.UnifyStringsInObject(typeof(T), entity, unifyNums);
 
             ActivityType activityType;
             if (entity.Id == ObjectId.Empty)

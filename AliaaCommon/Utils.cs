@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net.NetworkInformation;
@@ -338,6 +339,13 @@ namespace AliaaCommon
                     }
                 }
             }
+        }
+
+        public static string StreamToString(Stream stream)
+        {
+            stream.Position = 0;
+            using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
+                return reader.ReadToEnd();
         }
     }
 }
