@@ -15,7 +15,7 @@ namespace AliaaCommon
     {
         private readonly Type thisType;
 
-        private DataTableFactory()
+        public DataTableFactory()
         {
             thisType = typeof(DataTableFactory);
         }
@@ -24,16 +24,7 @@ namespace AliaaCommon
         {
             this.thisType = thisType;
         }
-
-        protected static DataTableFactory instance = null;
-
-        public static DataTableFactory GetInstance()
-        {
-            if (instance == null)
-                instance = new DataTableFactory();
-            return instance;
-        }
-
+        
         private Dictionary<Type, MethodInfo> methods = new Dictionary<Type, MethodInfo>();
 
         public DataTable Create<T>(bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null) where T : MongoEntity
@@ -59,7 +50,7 @@ namespace AliaaCommon
 
         protected static string INDEX_COLUMN = "ردیف";
 
-        public static Dictionary<PropertyInfo, string> CreateDataTableColumns<T>(DataTable table, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null)
+        public Dictionary<PropertyInfo, string> CreateDataTableColumns<T>(DataTable table, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null)
         {
             PropertyInfo[] props = typeof(T).GetProperties();
             Dictionary<PropertyInfo, string> displayNames = new Dictionary<PropertyInfo, string>();
