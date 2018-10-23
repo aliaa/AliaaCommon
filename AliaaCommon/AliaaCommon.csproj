@@ -81,7 +81,7 @@
     <Compile Include="Models\AuthUser.cs" />
     <Compile Include="MongoDB\DictionaryPresentationConvention.cs" />
     <Compile Include="MongoDB\LocalDateTimeSerializer.cs" />
-    <Compile Include="MongoDB\MongoDB.cs" />
+    <Compile Include="MongoDB\MongoHelper.cs" />
     <Compile Include="MongoDB\MongoEntity.cs" />
     <Compile Include="MongoDB\MongoIndexAttribute.cs" />
     <Compile Include="ObjectIdJsonConverter.cs" />

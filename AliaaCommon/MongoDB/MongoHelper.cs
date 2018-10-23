@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace AliaaCommon.MongoDB
 {
-    public class MongoDB
+    public class MongoHelper
     {
         public class CustomConnection
         {
@@ -33,7 +33,7 @@ namespace AliaaCommon.MongoDB
         private static readonly Dictionary<string, object> Collections = new Dictionary<string, object>();
         private static readonly Dictionary<Type, CollectionSaveAttribute> SaveAttrsCache = new Dictionary<Type, CollectionSaveAttribute>();
 
-        public MongoDB(PersianCharacters persianCharacters, string dbName, string connectionString, bool setDictionaryConventionToArrayOfDocuments, 
+        public MongoHelper(PersianCharacters persianCharacters, string dbName, string connectionString, bool setDictionaryConventionToArrayOfDocuments, 
             List<CustomConnection> customConnections)
         {
             this.persianCharacters = persianCharacters;
@@ -41,7 +41,10 @@ namespace AliaaCommon.MongoDB
             this.connectionString = connectionString;
             this.setDictionaryConventionToArrayOfDocuments = setDictionaryConventionToArrayOfDocuments;
             this.database = GetDatabase(connectionString, dbName, setDictionaryConventionToArrayOfDocuments);
-            this.customConnections = customConnections;
+            if (customConnections != null)
+                this.customConnections = customConnections;
+            else
+                this.customConnections = new List<CustomConnection>();
         }
 
         private IMongoDatabase GetDatabase(string connectionString, string dbName, bool setDictionaryConventionToArrayOfDocuments)
@@ -206,14 +209,18 @@ namespace AliaaCommon.MongoDB
             GetCollection<T>().DeleteOne(t => t.Id == id);
         }
 
-        public IEnumerable<T> All<T>()
-        {
-            return GetCollection<T>().Find(FilterDefinition<T>.Empty).ToEnumerable();
-        }
+        public IEnumerable<T> All<T>() => GetCollection<T>().Find(FilterDefinition<T>.Empty).ToEnumerable();
 
-        public bool Any<T>(Expression<Func<T, bool>> filter) where T : MongoEntity
-        {
-            return GetCollection<T>().Find(filter).Project(t => t.Id).FirstOrDefault() != ObjectId.Empty;
-        }
+        public bool Any<T>(Expression<Func<T, bool>> filter) where T : MongoEntity => GetCollection<T>().Find(filter).Project(t => t.Id).FirstOrDefault() != ObjectId.Empty;
+        
+        public IFindFluent<T, T> Find<T>(Expression<Func<T, bool>> filter, FindOptions options = null) => GetCollection<T>().Find(filter, options);
+
+        public IFindFluent<T, T> Find<T>(FilterDefinition<T> filter, FindOptions options = null) => GetCollection<T>().Find(filter, options);
+    
+        public long Count<T>(Expression<Func<T, bool>> filter, CountOptions options = null) => GetCollection<T>().CountDocuments(filter, options);
+
+        public long Count<T>(FilterDefinition<T> filter, CountOptions options = null) => GetCollection<T>().CountDocuments(filter, options);
+
+        public IAggregateFluent<T> Aggregate<T>(AggregateOptions options = null) => GetCollection<T>().Aggregate(options);
     }
 }
