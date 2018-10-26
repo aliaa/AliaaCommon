@@ -16,6 +16,7 @@ using System.Reflection;
 
 namespace AliaaCommon
 {
+    [Obsolete("This class is deprecated. User MongoHelper instead.")]
     public static class DB<T> where T : MongoEntity
     {
         private static PersianCharacters persianCharacters = new PersianCharacters(DBStatics.EXECUTION_PATH);

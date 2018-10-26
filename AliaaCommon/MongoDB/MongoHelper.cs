@@ -4,6 +4,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson.Serialization.Options;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +26,7 @@ namespace AliaaCommon.MongoDB
         public readonly string dbName;
         private readonly string connectionString;
         private readonly bool setDictionaryConventionToArrayOfDocuments;
-        private readonly IMongoDatabase database;
+        public readonly IMongoDatabase Database;
         private readonly List<CustomConnection> customConnections = new List<CustomConnection>();
         public bool DefaultWriteLog = false;
         public bool DefaultUnifyChars = false;
@@ -34,13 +35,13 @@ namespace AliaaCommon.MongoDB
         private static readonly Dictionary<Type, CollectionSaveAttribute> SaveAttrsCache = new Dictionary<Type, CollectionSaveAttribute>();
 
         public MongoHelper(PersianCharacters persianCharacters, string dbName, string connectionString, bool setDictionaryConventionToArrayOfDocuments, 
-            List<CustomConnection> customConnections)
+            List<CustomConnection> customConnections = null)
         {
             this.persianCharacters = persianCharacters;
             this.dbName = dbName;
             this.connectionString = connectionString;
             this.setDictionaryConventionToArrayOfDocuments = setDictionaryConventionToArrayOfDocuments;
-            this.database = GetDatabase(connectionString, dbName, setDictionaryConventionToArrayOfDocuments);
+            this.Database = GetDatabase(connectionString, dbName, setDictionaryConventionToArrayOfDocuments);
             if (customConnections != null)
                 this.customConnections = customConnections;
             else
@@ -75,7 +76,7 @@ namespace AliaaCommon.MongoDB
                 collection = GetCollection<T>(GetDatabase(customConnection.ConnectionString, customConnection.DBName, setDictionaryConventionToArrayOfDocuments));
             }
             else
-                collection = GetCollection<T>(database);
+                collection = GetCollection<T>(Database);
 
             SetIndexes(collection);
             try
@@ -151,6 +152,15 @@ namespace AliaaCommon.MongoDB
             return FindById<T>(ObjectId.Parse(id));
         }
 
+        private bool ShouldWriteLog<T>()
+        {
+            bool writeLog = DefaultWriteLog;
+            CollectionSaveAttribute attr = GetSaveAttribute(typeof(T));
+            if (attr != null)
+                writeLog = attr.WriteLog;
+            return writeLog;
+        }
+
         public void Save<T>(T item) where T : MongoEntity
         {
             bool writeLog = DefaultWriteLog;
@@ -183,30 +193,45 @@ namespace AliaaCommon.MongoDB
                 Save(new UserActivity(activityType, GetCollectionName(type), item));
         }
 
-        public void Delete<T>(T item) where T : MongoEntity
+        public DeleteResult DeleteOne<T>(T item) where T : MongoEntity
         {
-            GetCollection<T>().DeleteOne(t => t.Id == item.Id);
-            bool writeLog = DefaultWriteLog;
-            var attr = GetSaveAttribute(typeof(T));
-            if (attr != null)
-                writeLog = attr.WriteLog;
-            if(writeLog)
+            var result = GetCollection<T>().DeleteOne(t => t.Id == item.Id);
+            if(ShouldWriteLog<T>())
                 Save(new UserActivity(ActivityType.Delete, GetCollectionName(typeof(T)), item));
+            return result;
         }
 
-        public void Delete<T>(ObjectId id) where T : MongoEntity
+        public DeleteResult DeleteOne<T>(ObjectId id) where T : MongoEntity
         {
-            bool writeLog = DefaultWriteLog;
-            var attr = GetSaveAttribute(typeof(T));
-            if (attr != null)
-                writeLog = attr.WriteLog;
-            if (writeLog)
+            if (ShouldWriteLog<T>())
             {
                 T item = FindById<T>(id);
                 if (item != null)
                     Save(new UserActivity(ActivityType.Delete, GetCollectionName(typeof(T)), item));
             }
-            GetCollection<T>().DeleteOne(t => t.Id == id);
+            return GetCollection<T>().DeleteOne(t => t.Id == id);
+        }
+
+        public DeleteResult DeleteOne<T>(Expression<Func<T, bool>> filter) where T : MongoEntity
+        {
+            if (ShouldWriteLog<T>())
+            {
+                T item = Find(filter).FirstOrDefault();
+                if(item != null)
+                    Save(new UserActivity(ActivityType.Delete, GetCollectionName(typeof(T)), item));
+            }
+            return GetCollection<T>().DeleteOne(filter);
+        }
+
+        public UpdateResult UpdateOne<T>(Expression<Func<T, bool>> filter, UpdateDefinition<T> update, UpdateOptions options = null) where T : MongoEntity
+        {
+            if(ShouldWriteLog<T>())
+            {
+                T item = Find(filter).FirstOrDefault();
+                if (item != null)
+                    Save(new UserActivity(ActivityType.Update, GetCollectionName(typeof(T)), item));
+            }
+            return GetCollection<T>().UpdateOne(filter, update, options);
         }
 
         public IEnumerable<T> All<T>() => GetCollection<T>().Find(FilterDefinition<T>.Empty).ToEnumerable();
@@ -222,5 +247,9 @@ namespace AliaaCommon.MongoDB
         public long Count<T>(FilterDefinition<T> filter, CountOptions options = null) => GetCollection<T>().CountDocuments(filter, options);
 
         public IAggregateFluent<T> Aggregate<T>(AggregateOptions options = null) => GetCollection<T>().Aggregate(options);
+
+        public DeleteResult DeleteMany<T>(Expression<Func<T, bool>> filter) => GetCollection<T>().DeleteMany<T>(filter);
+
+        public IMongoQueryable<T> AsQueryable<T>(AggregateOptions options = null) => GetCollection<T>().AsQueryable(options);
     }
 }
