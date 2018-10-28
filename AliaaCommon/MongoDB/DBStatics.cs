@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace AliaaCommon
 {
+    [Obsolete("This class is deprecated. User MongoHelper instead.")]
     public static class DBStatics
     {
         public static bool WriteLogDefaultValue = true, UnifyCharsDefaultValue = true, UnifyNumsDefaultValue;

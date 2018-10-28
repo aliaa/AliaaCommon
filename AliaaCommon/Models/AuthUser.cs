@@ -15,6 +15,7 @@ namespace AliaaCommon.Models
 {
     [MongoIndex(Fields: new string[] { nameof(Username) }, Unique = true)]
     [BsonIgnoreExtraElements]
+    [CollectionSave(WriteLog = true)]
     public class AuthUser : MongoEntity
     {
         [Required]
