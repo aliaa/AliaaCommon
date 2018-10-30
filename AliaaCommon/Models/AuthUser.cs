@@ -66,14 +66,14 @@ namespace AliaaCommon.Models
             return Convert.ToBase64String(hash).Replace('+', '-').Replace('/', '_').Replace("=", "");
         }
 
-        public static bool CheckAuthentication(this IMongoCollection<AuthUser> collection, string username, string password, bool passwordIsHashed = false)
+        public static AuthUser CheckAuthentication(this IMongoCollection<AuthUser> collection, string username, string password, bool passwordIsHashed = false)
         {
             string hash;
             if (passwordIsHashed)
                 hash = password;
             else
                 hash = GetHash(password);
-            return DB<AuthUser>.Any(u => u.Username == username && u.HashedPassword == hash && u.Disabled != true);
+            return DB<AuthUser>.Collection.Find(u => u.Username == username && u.HashedPassword == hash && u.Disabled != true).FirstOrDefault();
         }
 
         public static AuthUser GetByUsername(this IMongoCollection<AuthUser> collection, string username)
