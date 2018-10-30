@@ -1,4 +1,5 @@
 ﻿using AliaaCommon;
+using AliaaCommon.MongoDB;
 using MongoDB.Bson;
 using System;
 using System.Collections;
@@ -13,32 +14,26 @@ namespace AliaaCommon
 {
     public class DataTableFactory
     {
-        private readonly Type thisType;
+        protected readonly Type thisType;
+        protected readonly MongoHelper DB;
 
-        private DataTableFactory()
+        public DataTableFactory(MongoHelper DB)
         {
             thisType = typeof(DataTableFactory);
+            this.DB = DB;
         }
 
-        protected DataTableFactory(Type thisType)
+        protected DataTableFactory(MongoHelper DB, Type thisType)
         {
             this.thisType = thisType;
+            this.DB = DB;
         }
-
-        protected static DataTableFactory instance = null;
-
-        public static DataTableFactory GetInstance()
-        {
-            if (instance == null)
-                instance = new DataTableFactory();
-            return instance;
-        }
-
+        
         private Dictionary<Type, MethodInfo> methods = new Dictionary<Type, MethodInfo>();
 
         public DataTable Create<T>(bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null) where T : MongoEntity
         {
-            return Create(DB<T>.All(), convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns);
+            return Create(DB.All<T>(), convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns);
         }
 
         public DataTable Create<T>(IEnumerable<T> data, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null)
@@ -59,7 +54,7 @@ namespace AliaaCommon
 
         protected static string INDEX_COLUMN = "ردیف";
 
-        public static Dictionary<PropertyInfo, string> CreateDataTableColumns<T>(DataTable table, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null)
+        public Dictionary<PropertyInfo, string> CreateDataTableColumns<T>(DataTable table, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null)
         {
             PropertyInfo[] props = typeof(T).GetProperties();
             Dictionary<PropertyInfo, string> displayNames = new Dictionary<PropertyInfo, string>();

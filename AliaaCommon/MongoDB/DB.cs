@@ -1,4 +1,5 @@
 ﻿using AliaaCommon.Models;
+using AliaaCommon.MongoDB;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
@@ -15,8 +16,11 @@ using System.Reflection;
 
 namespace AliaaCommon
 {
+    [Obsolete("This class is deprecated. User MongoHelper instead.")]
     public static class DB<T> where T : MongoEntity
     {
+        private static PersianCharacters persianCharacters = new PersianCharacters(DBStatics.EXECUTION_PATH);
+
         /// <summary>
         /// Gets DataBase object with values of written in App.config or Web.config for connection string ("MongoConnString") and database name ("DBName")
         /// </summary>
@@ -145,7 +149,8 @@ namespace AliaaCommon
                 var options = new CreateIndexOptions { Sparse = attr.Sparse, Unique = attr.Unique };
                 if (attr.ExpireAfterSeconds > 0)
                     options.ExpireAfter = new TimeSpan(attr.ExpireAfterSeconds * 10000000);
-                collection.Indexes.CreateOne(attr.GetIndexKeysDefinition<T>(), options);
+                CreateIndexModel<T> model = new CreateIndexModel<T>(attr.GetIndexKeysDefinition<T>(), options);
+                collection.Indexes.CreateOne(model);
             }
         }
 
@@ -173,7 +178,7 @@ namespace AliaaCommon
             }
 
             if (unifyChars)
-                PersianCharacters.UnifyStringsInObject(typeof(T), entity, unifyNums);
+                persianCharacters.UnifyStringsInObject(typeof(T), entity, unifyNums);
 
             ActivityType activityType;
             if (entity.Id == ObjectId.Empty)
@@ -224,64 +229,6 @@ namespace AliaaCommon
         public static bool Any(Expression<Func<T, bool>> filter)
         {
             return Collection.Find(filter).Project(t => t.Id).FirstOrDefault() != ObjectId.Empty;
-        }
-        
-        class DictionaryRepresentationConvention : ConventionBase, IMemberMapConvention
-        {
-            private readonly DictionaryRepresentation _dictionaryRepresentation;
-            public DictionaryRepresentationConvention(DictionaryRepresentation dictionaryRepresentation)
-            {
-                _dictionaryRepresentation = dictionaryRepresentation;
-            }
-            public void Apply(BsonMemberMap memberMap)
-            {
-                memberMap.SetSerializer(ConfigureSerializer(memberMap.GetSerializer()));
-            }
-            private IBsonSerializer ConfigureSerializer(IBsonSerializer serializer)
-            {
-                var dictionaryRepresentationConfigurable = serializer as IDictionaryRepresentationConfigurable;
-                if (dictionaryRepresentationConfigurable != null)
-                {
-                    serializer = dictionaryRepresentationConfigurable.WithDictionaryRepresentation(_dictionaryRepresentation);
-                }
-
-                var childSerializerConfigurable = serializer as IChildSerializerConfigurable;
-                return childSerializerConfigurable == null
-                    ? serializer
-                    : childSerializerConfigurable.WithChildSerializer(ConfigureSerializer(childSerializerConfigurable.ChildSerializer));
-            }
-        }
-
-        public class CustomSerializationProvider : IBsonSerializationProvider
-        {
-            static LocalDateTimeSerializer dateTimeSerializer = new LocalDateTimeSerializer();
-
-            public IBsonSerializer GetSerializer(Type type)
-            {
-                if (type == typeof(DateTime))
-                    return dateTimeSerializer;
-
-                return null; // falls back to Mongo defaults
-            }
-        }
-
-        public class LocalDateTimeSerializer : DateTimeSerializer
-        {
-            //  MongoDB returns datetime as DateTimeKind.Utc, which cann't be used in our timezone conversion logic
-            //  We overwrite it to be DateTimeKind.Unspecified
-            public override DateTime Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
-            {
-                var obj = base.Deserialize(context, args);
-                return new DateTime(obj.Ticks, DateTimeKind.Unspecified);
-            }
-
-            //  MongoDB stores all datetime as Utc, any datetime value DateTimeKind is not DateTimeKind.Utc, will be converted to Utc first
-            //  We overwrite it to be DateTimeKind.Utc, becasue we want to preserve the raw value
-            public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, DateTime value)
-            {
-                var utcValue = new DateTime(value.Ticks, DateTimeKind.Utc);
-                base.Serialize(context, args, utcValue);
-            }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using AliaaCommon.MongoDB;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using System;
@@ -14,6 +15,7 @@ namespace AliaaCommon.Models
 {
     [MongoIndex(Fields: new string[] { nameof(Username) }, Unique = true)]
     [BsonIgnoreExtraElements]
+    [CollectionSave(WriteLog = true)]
     public class AuthUser : MongoEntity
     {
         [Required]
@@ -47,12 +49,12 @@ namespace AliaaCommon.Models
         {
             set
             {
-                HashedPassword = AuthUserCollectionExtention.GetHash(value);
+                HashedPassword = AuthUserDBExtention.GetHash(value);
             }
         }
     }
 
-    public static class AuthUserCollectionExtention
+    public static class AuthUserDBExtention
     {
         private static readonly SHA1CryptoServiceProvider sha1 = new SHA1CryptoServiceProvider();
 
@@ -73,19 +75,19 @@ namespace AliaaCommon.Models
                 hash = password;
             else
                 hash = GetHash(password);
-            return DB<AuthUser>.Collection.Find(u => u.Username == username && u.HashedPassword == hash && u.Disabled != true).FirstOrDefault();
+            return DB.Find<AuthUser>(u => u.Username == username && u.HashedPassword == hash && u.Disabled != true).FirstOrDefault();
         }
 
-        public static AuthUser GetByUsername(this IMongoCollection<AuthUser> collection, string username)
+        public static AuthUser GetUserByUsername(this MongoHelper DB, string username)
         {
-            return collection.Find(u => u.Username == username).FirstOrDefault();
+            return DB.Find<AuthUser>(u => u.Username == username).FirstOrDefault();
         }
 
-        public static AuthUser GetCurrentUser(this IMongoCollection<AuthUser> collection)
+        public static AuthUser GetCurrentUser(this MongoHelper DB)
         {
             if (HttpContext.Current == null || HttpContext.Current.User == null || HttpContext.Current.User.Identity == null || string.IsNullOrEmpty(HttpContext.Current.User.Identity.Name))
                 return null;
-            return collection.GetByUsername(HttpContext.Current.User.Identity.Name);
+            return GetUserByUsername(DB, HttpContext.Current.User.Identity.Name);
         }
     }
 }
