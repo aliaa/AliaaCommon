@@ -68,7 +68,7 @@ namespace AliaaCommon.Models
             return Convert.ToBase64String(hash).Replace('+', '-').Replace('/', '_').Replace("=", "");
         }
 
-        public static AuthUser CheckAuthentication(this IMongoCollection<AuthUser> collection, string username, string password, bool passwordIsHashed = false)
+        public static AuthUser CheckAuthentication(this MongoHelper DB, string username, string password, bool passwordIsHashed = false)
         {
             string hash;
             if (passwordIsHashed)
