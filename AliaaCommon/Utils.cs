@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -93,16 +94,19 @@ namespace AliaaCommon
         {
             if (member == null)
                 return null;
-            DisplayNameAttribute attr = (DisplayNameAttribute)member.GetCustomAttribute(typeof(DisplayNameAttribute));
-            if (attr == null)
-            {
-                DisplayNameXAttribute attrx = (DisplayNameXAttribute)member.GetCustomAttribute(typeof(DisplayNameXAttribute));
-                if (attrx == null)
-                    return member.Name;
-                return attrx.DisplayName;
-            }
-            else
-                return attr.DisplayName;
+            Attribute attr = member.GetCustomAttribute<DisplayAttribute>();
+            if (attr != null)
+                return ((DisplayAttribute)attr).Name;
+
+            attr = member.GetCustomAttribute(typeof(DisplayNameAttribute));
+            if (attr != null)
+                return ((DisplayNameAttribute)attr).DisplayName;
+
+            attr = member.GetCustomAttribute(typeof(DisplayNameXAttribute));
+            if (attr != null)
+                return ((DisplayNameXAttribute)attr).DisplayName;
+
+            return member.Name;
         }
 
         public static string GetDisplayNameOfMember(Type classType, string memberName)
