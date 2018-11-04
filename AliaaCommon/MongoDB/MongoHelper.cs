@@ -234,6 +234,9 @@ namespace AliaaCommon.MongoDB
             return GetCollection<T>().UpdateOne(filter, update, options);
         }
 
+        public UpdateResult UpdateMany<T>(Expression<Func<T, bool>> filter, UpdateDefinition<T> update, UpdateOptions options = null) where T : MongoEntity
+            => GetCollection<T>().UpdateMany(filter, update, options);
+
         public IEnumerable<T> All<T>() => GetCollection<T>().Find(FilterDefinition<T>.Empty).ToEnumerable();
 
         public bool Any<T>(Expression<Func<T, bool>> filter) where T : MongoEntity => GetCollection<T>().Find(filter).Project(t => t.Id).FirstOrDefault() != ObjectId.Empty;
