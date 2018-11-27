@@ -15,23 +15,20 @@ namespace AliaaCommon
     public class DataTableFactory
     {
         protected readonly Type thisType;
-        protected readonly MongoHelper DB;
 
-        public DataTableFactory(MongoHelper DB)
+        public DataTableFactory()
         {
             thisType = typeof(DataTableFactory);
-            this.DB = DB;
         }
 
-        protected DataTableFactory(MongoHelper DB, Type thisType)
+        protected DataTableFactory(Type thisType)
         {
             this.thisType = thisType;
-            this.DB = DB;
         }
         
         private Dictionary<Type, MethodInfo> methods = new Dictionary<Type, MethodInfo>();
 
-        public DataTable Create<T>(bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null) where T : MongoEntity
+        public DataTable Create<T>(MongoHelper DB, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null) where T : MongoEntity
         {
             return Create(DB.All<T>(), convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns);
         }

@@ -31,7 +31,7 @@ namespace AliaaCommon.MongoDB
         public bool DefaultWriteLog = false;
         public bool DefaultUnifyChars = false;
         public bool DefaultUnifyNumbers = false;
-        private static readonly Dictionary<string, object> Collections = new Dictionary<string, object>();
+        private readonly Dictionary<string, object> Collections = new Dictionary<string, object>();
         private static readonly Dictionary<Type, CollectionSaveAttribute> SaveAttrsCache = new Dictionary<Type, CollectionSaveAttribute>();
 
         public MongoHelper(PersianCharacters persianCharacters, string dbName, string connectionString, bool setDictionaryConventionToArrayOfDocuments, 
