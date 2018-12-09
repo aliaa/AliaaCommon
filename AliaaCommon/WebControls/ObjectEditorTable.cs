@@ -1,17 +1,17 @@
-﻿using AliaaCommon;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
-using System.Web;
+using System.Text;
+using System.Threading.Tasks;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
 namespace AliaaCommon.WebControls
 {
-    public partial class ObjectEditorUI : System.Web.UI.UserControl
+    public class ObjectEditorTable
     {
         public enum ControlType
         {
@@ -22,19 +22,10 @@ namespace AliaaCommon.WebControls
             Unknown,
         }
 
-        protected void Page_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        public void CreateUI(Type type, bool enabled = true, int columnCount = 2, Dictionary<string, int> fieldsColSpan = null, 
+        public static void CreateUI(Table table, Type type, bool enabled = true, int columnCount = 2, Dictionary<string, int> fieldsColSpan = null,
             Dictionary<string, ControlType> overrideTypes = null, Dictionary<string, List<ListItem>> comboItems = null, string[] excludeFields = null)
         {
-            if(table == null)
-            {
-                table = new Table();
-                Controls.Add(table);
-            }
+            table.Rows.Clear();
             TableRow row = null;
             int i = 0;
             foreach (PropertyInfo prop in type.GetProperties())
@@ -52,18 +43,18 @@ namespace AliaaCommon.WebControls
 
                 if (i % columnCount == 0)
                 {
-                    if(i != 0)
+                    if (i != 0)
                         table.Rows.Add(row);
                     row = new TableRow();
                 }
-                
+
                 if (fieldsColSpan != null && fieldsColSpan.ContainsKey(prop.Name) && i % columnCount + fieldsColSpan[prop.Name] > columnCount)
                 {
                     table.Rows.Add(row);
                     row = new TableRow();
                     i += columnCount - (i % columnCount);
                 }
-                
+
                 Label lbl = new Label { Text = Utils.GetDisplayNameOfMember(prop) + ":" };
                 TableCell titleCell = new TableCell();
                 titleCell.Controls.Add(lbl);
@@ -137,7 +128,7 @@ namespace AliaaCommon.WebControls
                 ctrl.Enabled = enabled;
                 ctrl.ID = controlID;
                 TableCell ctrlCell = new TableCell();
-                if(fieldsColSpan != null && fieldsColSpan.ContainsKey(prop.Name))
+                if (fieldsColSpan != null && fieldsColSpan.ContainsKey(prop.Name))
                 {
                     int span = fieldsColSpan[prop.Name];
                     ctrlCell.ColumnSpan = (span - 1) * 3 + 1;
@@ -165,13 +156,13 @@ namespace AliaaCommon.WebControls
             return ControlType.Unknown;
         }
 
-        public void FillFromObject<T>(T obj, Dictionary<string, ControlType> overrideTypes = null)
+        public static void FillFromObject<T>(Table table, T obj, Dictionary<string, ControlType> overrideTypes = null)
         {
             if (obj == null)
                 return;
             foreach (PropertyInfo prop in typeof(T).GetProperties())
             {
-                Control ctrl = GetControl(prop.Name);
+                Control ctrl = GetControl(table, prop.Name);
                 if (ctrl == null)
                     continue;
                 ControlType controlType;
@@ -202,20 +193,20 @@ namespace AliaaCommon.WebControls
             }
         }
 
-        public Control GetControl(string propName)
+        public static Control GetControl(Table table, string propName)
         {
             string controlID = "ac_" + propName;
             return table.FindControl(controlID);
         }
 
-        public void FillToObject<T>(T obj, Dictionary<string, ControlType> overrideTypes = null)
+        public static void FillToObject<T>(Table table, T obj, Dictionary<string, ControlType> overrideTypes = null)
         {
             if (obj == null)
                 return;
             foreach (PropertyInfo prop in typeof(T).GetProperties())
             {
                 Type ptype = prop.PropertyType;
-                Control ctrl = GetControl(prop.Name);
+                Control ctrl = GetControl(table, prop.Name);
                 if (ctrl == null)
                     continue;
                 ControlType controlType;
@@ -237,7 +228,7 @@ namespace AliaaCommon.WebControls
                             break;
                         if (ptype == typeof(int))
                             prop.SetValue(obj, int.Parse(valueStr));
-                        else if(ptype == typeof(long))
+                        else if (ptype == typeof(long))
                             prop.SetValue(obj, long.Parse(valueStr));
                         else if (ptype == typeof(short))
                             prop.SetValue(obj, short.Parse(valueStr));
