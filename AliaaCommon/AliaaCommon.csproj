@@ -69,11 +69,13 @@
   <ItemGroup>
     <Compile Include="Compressor.cs" />
     <Compile Include="DataTableFactory.cs" />
+    <Compile Include="Models\DeleteActivity.cs" />
+    <Compile Include="Models\InsertActivity.cs" />
+    <Compile Include="Models\UpdateActivity.cs" />
     <Compile Include="MongoDB\CustomSerializationProvider.cs" />
     <Compile Include="MongoDB\DBStatics.cs" />
     <Compile Include="MongoDB\CollectionOptionsAttribute.cs" />
     <Compile Include="MongoDB\CollectionSaveAttribute.cs" />
-    <Compile Include="MongoDB\DB.cs" />
     <Compile Include="DisplayNameXAttribute.cs" />
     <Compile Include="HSLColor.cs" />
     <Compile Include="HttpHeadersCleanup.cs" />

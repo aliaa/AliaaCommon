@@ -109,8 +109,10 @@ namespace AliaaCommon.MongoDB
 
         private static string GetCollectionName(Type type)
         {
-            CollectionOptionsAttribute attr = (CollectionOptionsAttribute)Attribute.GetCustomAttribute(type, typeof(CollectionOptionsAttribute));
-            return attr?.Name ?? type.Name;
+            var attrs = (CollectionOptionsAttribute[])type.GetCustomAttributes(typeof(CollectionOptionsAttribute), true);
+            if (attrs == null || attrs.Length == 0)
+                return type.Name;
+            return attrs[0].Name;
         }
 
         private static bool CheckCollectionExists(IMongoDatabase db, string collectionName)
@@ -179,6 +181,7 @@ namespace AliaaCommon.MongoDB
                 persianCharacters.UnifyStringsInObject(type, item, unifyNums);
 
             ActivityType activityType;
+            T oldValue = null;
             if (item.Id == ObjectId.Empty)
             {
                 GetCollection<T>().InsertOne(item);
@@ -186,18 +189,36 @@ namespace AliaaCommon.MongoDB
             }
             else
             {
+                if (writeLog)
+                    oldValue = FindById<T>(item.Id);
                 GetCollection<T>().ReplaceOne(t => t.Id == item.Id, item, new UpdateOptions { IsUpsert = true });
                 activityType = ActivityType.Update;
             }
             if (writeLog)
-                Save(new UserActivity(activityType, GetCollectionName(type), item));
+            {
+                if (activityType == ActivityType.Insert)
+                {
+                    var insertActivity = new InsertActivity { CollectionName = GetCollectionName(type), ObjId = item.Id };
+                    Save((UserActivity)insertActivity);
+                }
+                else
+                {
+                    UpdateActivity update = new UpdateActivity { CollectionName = GetCollectionName(type), ObjId = oldValue.Id };
+                    update.SetDiff(oldValue, item);
+                    if (update.Diff.Count > 0)
+                        Save((UserActivity)update);
+                }
+            }
         }
 
         public DeleteResult DeleteOne<T>(T item) where T : MongoEntity
         {
             var result = GetCollection<T>().DeleteOne(t => t.Id == item.Id);
-            if(ShouldWriteLog<T>())
-                Save(new UserActivity(ActivityType.Delete, GetCollectionName(typeof(T)), item));
+            if (ShouldWriteLog<T>())
+            {
+                var deleteActivity = new DeleteActivity { CollectionName = GetCollectionName(typeof(T)), ObjId = item.Id, DeletedObj = item };
+                Save((UserActivity)deleteActivity);
+            }
             return result;
         }
 
@@ -207,7 +228,10 @@ namespace AliaaCommon.MongoDB
             {
                 T item = FindById<T>(id);
                 if (item != null)
-                    Save(new UserActivity(ActivityType.Delete, GetCollectionName(typeof(T)), item));
+                {
+                    var deleteActivity = new DeleteActivity { CollectionName = GetCollectionName(typeof(T)), ObjId = item.Id, DeletedObj = item };
+                    Save((UserActivity)deleteActivity);
+                }
             }
             return GetCollection<T>().DeleteOne(t => t.Id == id);
         }
@@ -217,21 +241,30 @@ namespace AliaaCommon.MongoDB
             if (ShouldWriteLog<T>())
             {
                 T item = Find(filter).FirstOrDefault();
-                if(item != null)
-                    Save(new UserActivity(ActivityType.Delete, GetCollectionName(typeof(T)), item));
+                if (item != null)
+                {
+                    var deleteActivity = new DeleteActivity { CollectionName = GetCollectionName(typeof(T)), ObjId = item.Id, DeletedObj = item };
+                    Save((UserActivity)deleteActivity);
+                }
             }
             return GetCollection<T>().DeleteOne(filter);
         }
 
-        public UpdateResult UpdateOne<T>(Expression<Func<T, bool>> filter, UpdateDefinition<T> update, UpdateOptions options = null) where T : MongoEntity
+        public UpdateResult UpdateOne<T>(Expression<Func<T, bool>> filter, UpdateDefinition<T> updateDef, UpdateOptions options = null) where T : MongoEntity
         {
-            if(ShouldWriteLog<T>())
+            T oldValue = null;
+            bool writeLog = ShouldWriteLog<T>();
+            if(writeLog)
+                oldValue = Find(filter).FirstOrDefault();
+            var res = GetCollection<T>().UpdateOne(filter, updateDef, options);
+            if (oldValue != null)
             {
-                T item = Find(filter).FirstOrDefault();
-                if (item != null)
-                    Save(new UserActivity(ActivityType.Update, GetCollectionName(typeof(T)), item));
+                UpdateActivity updateActivity = new UpdateActivity { CollectionName = GetCollectionName(typeof(T)), ObjId = oldValue.Id };
+                T newValue = FindById<T>(oldValue.Id);
+                updateActivity.SetDiff(oldValue, newValue);
+                Save((UserActivity)updateActivity);
             }
-            return GetCollection<T>().UpdateOne(filter, update, options);
+            return res;
         }
 
         public UpdateResult UpdateMany<T>(Expression<Func<T, bool>> filter, UpdateDefinition<T> update, UpdateOptions options = null) where T : MongoEntity

@@ -1,42 +1,29 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace AliaaCommon.Models
 {
     [CollectionOptions(Name = "ActivityLogs", Capped = true, MaxSize = 100000000)]
     [CollectionSave(WriteLog = false, UnifyChars = false, UnifyNumbers = false)]
-    public class UserActivity : MongoEntity
+    [BsonKnownTypes(typeof(DeleteActivity), typeof(InsertActivity), typeof(UpdateActivity))]
+    public abstract class UserActivity : MongoEntity
     {
         public string Username { get; set; }
 
         public DateTime Time { get; set; } = DateTime.Now;
 
         [BsonRepresentation(BsonType.String)]
-
-        public ActivityType ActivityType { get; set; }
-
-        public MongoEntity Obj { get; set; }
+        public ActivityType ActivityType { get; protected set; }
 
         public string CollectionName { get; set; }
 
+        public ObjectId ObjId { get; set; }
+
         public UserActivity()
         {
-            if (HttpContext.Current != null)
-                Username = HttpContext.Current.User.Identity.Name;
-        }
-
-        public UserActivity(ActivityType activityType, string collectionName, MongoEntity obj)
-            : this()
-        {
-            this.ActivityType = activityType;
-            this.CollectionName = collectionName;
-            this.Obj = obj;
+            Username = HttpContext.Current.User.Identity.Name;
         }
     }
 
