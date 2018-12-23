@@ -110,7 +110,7 @@ namespace AliaaCommon.MongoDB
         private static string GetCollectionName(Type type)
         {
             var attrs = (CollectionOptionsAttribute[])type.GetCustomAttributes(typeof(CollectionOptionsAttribute), true);
-            if (attrs == null || attrs.Length == 0)
+            if (attrs == null || attrs.Length == 0 || attrs[0].Name == null)
                 return type.Name;
             return attrs[0].Name;
         }
