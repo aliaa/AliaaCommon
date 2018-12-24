@@ -24,7 +24,7 @@ namespace AliaaCommon.Models
             {
                 object oldVal = prop.GetValue(oldObj);
                 object newVal = prop.GetValue(newObj);
-                bool areEqual = newVal.Equals(oldVal);
+                bool areEqual = (newVal == oldVal);
                 if (!areEqual && !(newVal is string) && (newVal is IEnumerable))
                 {
                     areEqual = true;
