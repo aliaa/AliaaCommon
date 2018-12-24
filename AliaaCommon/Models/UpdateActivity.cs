@@ -2,7 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq.Expressions;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,10 +20,10 @@ namespace AliaaCommon.Models
         public void SetDiff<T>(T oldObj, T newObj)
         {
             Diff = new List<Variance>();
-            foreach (var p in typeof(T).GetProperties())
+            foreach (var prop in typeof(T).GetProperties().Where(p => p.CanRead))
             {
-                object oldVal = p.GetValue(oldObj);
-                object newVal = p.GetValue(newObj);
+                object oldVal = prop.GetValue(oldObj);
+                object newVal = prop.GetValue(newObj);
                 bool areEqual = newVal.Equals(oldVal);
                 if (!areEqual && !(newVal is string) && (newVal is IEnumerable))
                 {
@@ -49,7 +49,7 @@ namespace AliaaCommon.Models
                     }
                 }
                 if (!areEqual)
-                    Diff.Add(new Variance { Prop = p.Name, OldValue = oldVal, NewValue = newVal });
+                    Diff.Add(new Variance { Prop = prop.Name, OldValue = oldVal, NewValue = newVal });
             }
         }
 
