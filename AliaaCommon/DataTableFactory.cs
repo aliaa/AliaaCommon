@@ -1,5 +1,4 @@
-﻿using AliaaCommon;
-using AliaaCommon.MongoDB;
+﻿using AliaaCommon.MongoDB;
 using MongoDB.Bson;
 using System;
 using System.Collections;
@@ -8,7 +7,6 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Web;
 
 namespace AliaaCommon
 {
@@ -28,12 +26,14 @@ namespace AliaaCommon
         
         private Dictionary<Type, MethodInfo> methods = new Dictionary<Type, MethodInfo>();
 
-        public DataTable Create<T>(MongoHelper DB, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null) where T : MongoEntity
+        public DataTable Create<T>(MongoHelper DB, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, 
+            string[] excludeColumns = null, Dictionary<string, Dictionary<ObjectId, string>> valuesReferenceReplacement = null) where T : MongoEntity
         {
-            return Create(DB.All<T>(), convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns);
+            return Create(DB.All<T>(), convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns, valuesReferenceReplacement);
         }
 
-        public DataTable Create<T>(IEnumerable<T> data, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null)
+        public DataTable Create<T>(IEnumerable<T> data, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, 
+            string[] excludeColumns = null, Dictionary<string, Dictionary<ObjectId, string>> valuesReferenceReplacement = null)
         {
             Type type = typeof(T);
             MethodInfo method;
@@ -45,13 +45,14 @@ namespace AliaaCommon
                 methods.Add(type, method);
             }
             if (method == null)
-                return CreateDataTable(new DataTable(), data, convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns);
-            return (DataTable)method.Invoke(this, new object[] { data, convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns });
+                return CreateDataTable(new DataTable(), data, convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns, valuesReferenceReplacement);
+            return (DataTable)method.Invoke(this, new object[] { data, convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns, valuesReferenceReplacement });
         }
 
         protected static string INDEX_COLUMN = "ردیف";
 
-        public Dictionary<PropertyInfo, string> CreateDataTableColumns<T>(DataTable table, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null)
+        public Dictionary<PropertyInfo, string> CreateDataTableColumns<T>(DataTable table, bool convertDateToPersian = true, bool includeTimeInDates = true, 
+            bool addIndexColumn = false, string[] excludeColumns = null)
         {
             PropertyInfo[] props = typeof(T).GetProperties();
             Dictionary<PropertyInfo, string> displayNames = new Dictionary<PropertyInfo, string>();
@@ -84,7 +85,8 @@ namespace AliaaCommon
             return displayNames;
         }
 
-        public DataTable CreateDataTable<T>(DataTable table, IEnumerable<T> list, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, string[] excludeColumns = null)
+        public DataTable CreateDataTable<T>(DataTable table, IEnumerable<T> list, bool convertDateToPersian = true, bool includeTimeInDates = true, 
+            bool addIndexColumn = false, string[] excludeColumns = null, Dictionary<string, Dictionary<ObjectId, string>> valuesReferenceReplacement = null)
         {
             if (list == null)
                 return null;
@@ -101,7 +103,15 @@ namespace AliaaCommon
                     object value = p.GetValue(item);
                     if (value is ObjectId)
                     {
-                        value = value.ToString();
+                        if(valuesReferenceReplacement != null && valuesReferenceReplacement.ContainsKey(p.Name))
+                        {
+                            if (valuesReferenceReplacement[p.Name].ContainsKey((ObjectId)value))
+                                value = valuesReferenceReplacement[p.Name][(ObjectId)value];
+                            else
+                                value = null;
+                        }
+                        else
+                            value = value.ToString();
                     }
                     else if (p.PropertyType.IsEnum)
                         value = Utils.GetDisplayNameOfMember(p.PropertyType, value.ToString());
