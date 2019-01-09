@@ -25,7 +25,7 @@ namespace AliaaCommon.Models
                 object oldVal = prop.GetValue(oldObj);
                 object newVal = prop.GetValue(newObj);
                 bool areEqual = (newVal == oldVal);
-                if (!areEqual && !(newVal is string) && (newVal is IEnumerable))
+                if (!areEqual && oldVal != null && newVal != null && !(newVal is string) && (newVal is IEnumerable))
                 {
                     areEqual = true;
                     var enOld = ((IEnumerable)oldVal).GetEnumerator();
