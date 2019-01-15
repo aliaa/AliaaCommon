@@ -13,20 +13,30 @@ namespace AliaaCommon
     public class DataTableFactory
     {
         protected readonly Type thisType;
+        protected readonly MongoHelper DB;
 
-        public DataTableFactory()
+
+        public DataTableFactory(MongoHelper DB)
         {
+            this.DB = DB;
             thisType = typeof(DataTableFactory);
         }
 
-        protected DataTableFactory(Type thisType)
+        protected DataTableFactory(MongoHelper DB, Type thisType)
         {
+            this.DB = DB;
             this.thisType = thisType;
         }
         
         private Dictionary<Type, MethodInfo> methods = new Dictionary<Type, MethodInfo>();
 
-        public DataTable Create<T>(MongoHelper DB, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, 
+        public DataTable Create<T>(bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, 
+            string[] excludeColumns = null, Dictionary<string, Dictionary<ObjectId, string>> valuesReferenceReplacement = null) where T : MongoEntity
+        {
+            return Create(DB.All<T>(), convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns, valuesReferenceReplacement);
+        }
+
+        public DataTable Create<T>(MongoHelper DB, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false,
             string[] excludeColumns = null, Dictionary<string, Dictionary<ObjectId, string>> valuesReferenceReplacement = null) where T : MongoEntity
         {
             return Create(DB.All<T>(), convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns, valuesReferenceReplacement);
@@ -45,7 +55,7 @@ namespace AliaaCommon
                 methods.Add(type, method);
             }
             if (method == null)
-                return CreateDataTable(new DataTable(), data, convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns, valuesReferenceReplacement);
+                return Create(new DataTable(), data, convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns, valuesReferenceReplacement);
             return (DataTable)method.Invoke(this, new object[] { data, convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns, valuesReferenceReplacement });
         }
 
@@ -85,7 +95,7 @@ namespace AliaaCommon
             return displayNames;
         }
 
-        public DataTable CreateDataTable<T>(DataTable table, IEnumerable<T> list, bool convertDateToPersian = true, bool includeTimeInDates = true, 
+        public DataTable Create<T>(DataTable table, IEnumerable<T> list, bool convertDateToPersian = true, bool includeTimeInDates = true, 
             bool addIndexColumn = false, string[] excludeColumns = null, Dictionary<string, Dictionary<ObjectId, string>> valuesReferenceReplacement = null)
         {
             if (list == null)

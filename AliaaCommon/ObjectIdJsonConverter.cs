@@ -12,8 +12,7 @@ namespace AliaaCommon
     {
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            serializer.Serialize(writer, value.ToString());
-
+            writer.WriteValue(((ObjectId)value).ToString());
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
@@ -23,8 +22,7 @@ namespace AliaaCommon
 
         public override bool CanConvert(Type objectType)
         {
-            return typeof(ObjectId).IsAssignableFrom(objectType);
-            //return true;
+            return typeof(ObjectId) == objectType;
         }
     }
 }
