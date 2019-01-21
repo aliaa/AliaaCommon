@@ -70,6 +70,7 @@
     <Compile Include="Compressor.cs" />
     <Compile Include="DataTableFactory.cs" />
     <Compile Include="Models\DeleteActivity.cs" />
+    <Compile Include="Models\ExceptionLog.cs" />
     <Compile Include="Models\InsertActivity.cs" />
     <Compile Include="Models\UpdateActivity.cs" />
     <Compile Include="MongoDB\CustomSerializationProvider.cs" />
