@@ -23,7 +23,7 @@ namespace AliaaCommon.Models
 
         public UserActivity()
         {
-            Username = HttpContext.Current.User.Identity.Name;
+            Username = HttpContext.Current?.User?.Identity?.Name;
         }
     }
 

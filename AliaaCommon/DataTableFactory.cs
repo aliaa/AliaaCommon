@@ -87,7 +87,11 @@ namespace AliaaCommon
                 {
                     Type undelying = Nullable.GetUnderlyingType(propType);
                     if (undelying != null)
+                    {
                         propType = undelying;
+                        if (propType == typeof(DateTime) && (!includeTimeInDates || convertDateToPersian))
+                            propType = typeof(string);
+                    }
                 }
                 DataColumn col = new DataColumn(dispName, propType);
                 table.Columns.Add(col);
