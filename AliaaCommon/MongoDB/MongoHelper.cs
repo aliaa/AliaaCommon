@@ -267,6 +267,9 @@ namespace AliaaCommon.MongoDB
             return res;
         }
 
+        public UpdateResult UpdateMany<T>(FilterDefinition<T> filter, UpdateDefinition<T> update, UpdateOptions options = null) where T : MongoEntity
+            => GetCollection<T>().UpdateMany(filter, update, options);
+
         public UpdateResult UpdateMany<T>(Expression<Func<T, bool>> filter, UpdateDefinition<T> update, UpdateOptions options = null) where T : MongoEntity
             => GetCollection<T>().UpdateMany(filter, update, options);
 
