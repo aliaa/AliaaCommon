@@ -20,16 +20,14 @@ namespace AliaaCommon.WebControls
             Unknown,
         }
 
-        public static void CreateUI(Table table, Type type, bool enabled = true, int columnCount = 2, Dictionary<string, int> fieldsColSpan = null,
+        public static void CreateUI<T>(Table table, bool enabled = true, int columnCount = 2, Dictionary<string, int> fieldsColSpan = null,
             Dictionary<string, ControlType> overrideTypes = null, Dictionary<string, List<ListItem>> comboItems = null, string[] excludeFields = null)
         {
             table.Rows.Clear();
             TableRow row = null;
             int i = 0;
-            foreach (PropertyInfo prop in type.GetProperties())
+            foreach (PropertyInfo prop in typeof(T).GetProperties().Where(p => excludeFields == null || !excludeFields.Contains(p.Name)))
             {
-                if (excludeFields != null && excludeFields.Contains(prop.Name))
-                    continue;
                 Type ptype = prop.PropertyType;
                 ControlType controlType;
                 if (overrideTypes != null && overrideTypes.ContainsKey(prop.Name))
@@ -194,7 +192,21 @@ namespace AliaaCommon.WebControls
         public static Control GetControl(Table table, string propName)
         {
             string controlID = "ac_" + propName;
-            return table.FindControl(controlID);
+            return FindControlRecursive(table, controlID);
+        }
+
+        private static Control FindControlRecursive(Control parent, string id)
+        {
+            if (parent.ID == id)
+                return parent;
+
+            foreach (Control ctrl in parent.Controls)
+            {
+                Control controlToReturn = FindControlRecursive(ctrl, id);
+                if (controlToReturn != null)
+                    return controlToReturn;
+            }
+            return null;
         }
 
         public static void FillToObject<T>(Table table, T obj, Dictionary<string, ControlType> overrideTypes = null)
