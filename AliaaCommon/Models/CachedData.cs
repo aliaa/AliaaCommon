@@ -16,11 +16,15 @@ namespace AliaaCommon.Models
         private T _data;
         public T Data
         {
-            private set { _data = value; }
+            private set
+            {
+                _data = value;
+                CacheTime = DateTime.Now;
+            }
             get
             {
-                if(IsExpired && AutoRefreshFunc != null)
-                    _data = AutoRefreshFunc(_data);
+                if (IsExpired && AutoRefreshFunc != null)
+                    Data = AutoRefreshFunc(_data);
                 return _data;
             }
         }
@@ -29,14 +33,12 @@ namespace AliaaCommon.Models
         {
             this.Data = Data;
             this.ExpirationDuration = ExpirationDuration;
-            CacheTime = DateTime.Now;
         }
 
         public CachedData(T Data, int expireAfterSeconds)
         {
             this.Data = Data;
             ExpirationDuration = new TimeSpan(0, 0, expireAfterSeconds);
-            CacheTime = DateTime.Now;
         }
 
         public bool IsExpired => DateTime.Now > CacheTime.Add(ExpirationDuration);
