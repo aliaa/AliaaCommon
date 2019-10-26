@@ -66,7 +66,7 @@ namespace AliaaCommon
         {
             PropertyInfo[] props = typeof(T).GetProperties();
             Dictionary<PropertyInfo, string> displayNames = new Dictionary<PropertyInfo, string>();
-            if (addIndexColumn)
+            if (addIndexColumn && !table.Columns.Contains(INDEX_COLUMN))
                 table.Columns.Add(INDEX_COLUMN, typeof(int));
 
             foreach (PropertyInfo p in props)

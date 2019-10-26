@@ -6,6 +6,11 @@ namespace AliaaCommon.Models
     [CollectionSave(WriteLog = false, UnifyChars = false)]
     public class ExceptionLog : MongoEntity
     {
+        public static implicit operator ExceptionLog(Exception ex)
+        {
+            return new ExceptionLog(ex);
+        }
+
         private const int INNER_EXCEPTION_COUNT = 50;
 
         public ExceptionLog() { }
