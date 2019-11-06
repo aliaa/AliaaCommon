@@ -31,6 +31,9 @@ namespace AliaaCommon
             return _instance;
         }
 
+        public PersianCharacters()
+            : this(Path.GetDirectoryName(Assembly.GetAssembly(typeof(PersianCharacters)).Location)) { }
+
         public PersianCharacters(string path)
         {
             string filePath = Path.Combine(path, "PersianChars.json");
