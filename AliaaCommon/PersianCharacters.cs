@@ -15,7 +15,7 @@ namespace AliaaCommon
     {
         private class CharsData
         {
-            public List<char> IgnoredChars { get; set; }
+            public HashSet<char> IgnoredChars { get; set; }
             public Dictionary<char, char> CharMapping { get; set; }
             public Dictionary<char, char> NumbersMapping { get; set; }
             public Dictionary<char, char> NumbersMappingInverse { get; set; }
