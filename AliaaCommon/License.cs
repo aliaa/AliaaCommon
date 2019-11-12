@@ -42,7 +42,7 @@ namespace AliaaCommon
     public class LicenseContent
     {
         public string User { get; set; }
-        public string LicenseBy { get; set; } = "Ali Aboutalebi 2017 (abootalebi@gmail.com)";
+        public string LicenseBy { get; set; } = "Ali Aboutalebi 2019 (abootalebi@gmail.com)";
         public string Mac { get; set; }
         public DateTime ExpDate { get; set; }
     }

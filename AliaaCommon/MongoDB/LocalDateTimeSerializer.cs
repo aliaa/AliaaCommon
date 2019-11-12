@@ -10,7 +10,7 @@ namespace AliaaCommon.MongoDB
 {
     public class LocalDateTimeSerializer : DateTimeSerializer
     {
-        //  MongoDB returns datetime as DateTimeKind.Utc, which cann't be used in our timezone conversion logic
+        //  MongoDB returns datetime as DateTimeKind.Utc, which can't be used in our timezone conversion logic
         //  We overwrite it to be DateTimeKind.Unspecified
         public override DateTime Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
         {
