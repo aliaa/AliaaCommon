@@ -2,18 +2,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Web;
 using Newtonsoft.Json;
 
 namespace AliaaCommon
 {
 
-    public class PersianCharacters
+    public class StringNormalizer : IStringNormalizer
     {
-        private class CharsData
+        public class CharsData
         {
             public HashSet<char> IgnoredChars { get; set; }
             public Dictionary<char, char> CharMapping { get; set; }
@@ -21,30 +19,32 @@ namespace AliaaCommon
             public Dictionary<char, char> NumbersMappingInverse { get; set; }
         }
 
-        private CharsData charsData;
+        private readonly CharsData charsData;
+        public bool AlsoMapNumberDigits { get; set; } = false;
 
-        private static PersianCharacters _instance = null;
-        public static PersianCharacters GetInstance(string path)
+        private static StringNormalizer _instance = null;
+        public static StringNormalizer GetInstance(string jsonFilePath)
         {
             if (_instance == null)
-                _instance = new PersianCharacters(path);
+                _instance = new StringNormalizer(jsonFilePath);
             return _instance;
         }
 
-        public PersianCharacters()
-            : this(Path.GetDirectoryName(Assembly.GetAssembly(typeof(PersianCharacters)).Location)) { }
-
-        public PersianCharacters(string path)
+        public StringNormalizer(string jsonFilePath)
         {
-            string filePath = Path.Combine(path, "PersianChars.json");
-            charsData = JsonConvert.DeserializeObject<CharsData>(File.ReadAllText(filePath));
+            charsData = JsonConvert.DeserializeObject<CharsData>(File.ReadAllText(jsonFilePath));
         }
 
-        public char UnifyCharacter(char ch, bool farsiNumbers)
+        public StringNormalizer(CharsData charsData)
+        {
+            this.charsData = charsData;
+        }
+
+        private char UnifyCharacter(char ch)
         {
             if (charsData.CharMapping.ContainsKey(ch))
                 return charsData.CharMapping[ch];
-            if (farsiNumbers)
+            if (AlsoMapNumberDigits)
             {
                 if(charsData.NumbersMapping.ContainsKey(ch))
                     return charsData.NumbersMapping[ch];
@@ -57,7 +57,7 @@ namespace AliaaCommon
             return ch;
         }
 
-        public string UnifyString(string str, bool farsiNumbers)
+        public string NormalizeString(string str)
         {
             if (string.IsNullOrEmpty(str))
                 return str;
@@ -65,38 +65,39 @@ namespace AliaaCommon
             foreach (char ch in str)
             {
                 if (!charsData.IgnoredChars.Contains(ch))
-                    sb.Append(UnifyCharacter(ch, farsiNumbers));
+                    sb.Append(UnifyCharacter(ch));
             }
             return sb.ToString();
         }
 
-        public char ConvertPersianDigitToEnglish(char ch)
+        private char MapDigitChar(char ch)
         {
             if (charsData.NumbersMappingInverse.ContainsKey(ch))
                 return charsData.NumbersMappingInverse[ch];
             return ch;
         }
 
-        public string ConvertPersianDigitToEnglish(string str)
+        public string MapDigitString(string str)
         {
             if (string.IsNullOrEmpty(str))
                 return str;
             StringBuilder sb = new StringBuilder();
             foreach (char ch in str)
             {
-                sb.Append(ConvertPersianDigitToEnglish(ch));
+                sb.Append(MapDigitChar(ch));
             }
             return sb.ToString();
         }
 
-        public void UnifyStringsInObject(Type entityType, object entity, bool farsiNumbers = false)
+        public void NormalizeStringsInObject(object obj)
         {
-            foreach (PropertyInfo p in entityType.GetProperties())
+            Type type = obj.GetType();
+            foreach (PropertyInfo p in type.GetProperties())
             {
                 object value;
                 try
                 {
-                    value = p.GetValue(entity);
+                    value = p.GetValue(obj);
                 }
                 catch { continue; }
                 if (value == null)
@@ -106,26 +107,26 @@ namespace AliaaCommon
                     if (!p.CanRead || !p.CanWrite)
                         continue;
                     string original = value as string;
-                    string unified = UnifyString(original, farsiNumbers);
-                    if (original != unified)
+                    string normalized = NormalizeString(original);
+                    if (original != normalized)
                     {
                         try
                         {
-                            p.SetValue(entity, unified);
+                            p.SetValue(obj, normalized);
                         }
                         catch { continue; }
                     }
                 }
                 else if (p.PropertyType.IsSubclassOf(typeof(MongoEntity)))
                 {
-                    UnifyStringsInObject(p.PropertyType, p.GetValue(entity), farsiNumbers);
+                    NormalizeStringsInObject(p.GetValue(obj));
                 }
                 else if (value is IEnumerable)
                 {
                     IEnumerable array = value as IEnumerable;
                     foreach (var item in array)
                         if (item != null)
-                            UnifyStringsInObject(item.GetType(), item, farsiNumbers);
+                            NormalizeStringsInObject(item);
                 }
             }
         }

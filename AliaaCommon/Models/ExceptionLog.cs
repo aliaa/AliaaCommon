@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AliaaCommon.Models
 {
-    [CollectionSave(WriteLog = false, UnifyChars = false)]
+    [CollectionSave(WriteLog = false, NormalizeStrings = false)]
     public class ExceptionLog : MongoEntity
     {
         public static implicit operator ExceptionLog(Exception ex)

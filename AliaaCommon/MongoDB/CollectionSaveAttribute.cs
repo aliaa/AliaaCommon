@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AliaaCommon
 {
@@ -10,14 +6,12 @@ namespace AliaaCommon
     public class CollectionSaveAttribute : Attribute
     {
         public bool WriteLog { get; set; }
-        public bool UnifyChars { get; set; }
-        public bool UnifyNumbers { get; set; }
+        public bool NormalizeStrings { get; set; }
 
-        public CollectionSaveAttribute(bool WriteLog = true, bool UnifyChars = true, bool UnifyNumbers = false)
+        public CollectionSaveAttribute(bool WriteLog = true, bool NormalizeStrings = true)
         {
             this.WriteLog = WriteLog;
-            this.UnifyChars = UnifyChars;
-            this.UnifyNumbers = UnifyNumbers;
+            this.NormalizeStrings = NormalizeStrings;
         }
     }
 }

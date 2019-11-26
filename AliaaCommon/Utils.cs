@@ -351,5 +351,16 @@ namespace AliaaCommon
             using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
                 return reader.ReadToEnd();
         }
+
+        private static Random random = new Random(DateTime.Now.GetHashCode());
+        private const string PASSWORD_CHARS = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz!?@$%*&";
+
+        public static string GenerateRandomPassword(int size = 8)
+        {
+            StringBuilder sb = new StringBuilder(size);
+            for (int i = 0; i < size; i++)
+                sb.Append(PASSWORD_CHARS[random.Next(0, PASSWORD_CHARS.Length)]);
+            return sb.ToString();
+        }
     }
 }

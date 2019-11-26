@@ -77,6 +77,7 @@
   <ItemGroup>
     <Compile Include="Compressor.cs" />
     <Compile Include="DataTableFactory.cs" />
+    <Compile Include="IStringNormalizer.cs" />
     <Compile Include="Models\CachedData.cs" />
     <Compile Include="Models\DeleteActivity.cs" />
     <Compile Include="Models\ExceptionLog.cs" />
@@ -97,7 +98,7 @@
     <Compile Include="MongoDB\MongoEntity.cs" />
     <Compile Include="MongoDB\MongoIndexAttribute.cs" />
     <Compile Include="ObjectIdJsonConverter.cs" />
-    <Compile Include="PersianCharacters.cs" />
+    <Compile Include="StringNormalizer.cs" />
     <Compile Include="Pipelining\PipelineEndTask.cs" />
     <Compile Include="Pipelining\PipelineMiddleTask.cs" />
     <Compile Include="Pipelining\Pipeliner.cs" />
@@ -110,7 +111,7 @@
     <Compile Include="WebControls\ObjectEditorTable.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="PersianChars.json">
+    <Content Include="PersianCharsMap.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="app.config" />

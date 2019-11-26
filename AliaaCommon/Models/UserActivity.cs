@@ -5,8 +5,8 @@ using System.Web;
 
 namespace AliaaCommon.Models
 {
-    [CollectionOptions(Name = "ActivityLogs", Capped = true, MaxSize = 100000000)]
-    [CollectionSave(WriteLog = false, UnifyChars = false, UnifyNumbers = false)]
+    [CollectionOptions(Name = "ActivityLogs", Capped = true, MaxSize = 10000000)]
+    [CollectionSave(WriteLog = false, NormalizeStrings = false)]
     [BsonKnownTypes(typeof(DeleteActivity), typeof(InsertActivity), typeof(UpdateActivity))]
     public abstract class UserActivity : MongoEntity
     {

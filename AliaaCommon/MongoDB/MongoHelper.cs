@@ -22,22 +22,21 @@ namespace AliaaCommon.MongoDB
             public string ConnectionString { get; set; }
         }
 
-        private readonly PersianCharacters persianCharacters;
+        private readonly IStringNormalizer stringNormalizer;
         public readonly string dbName;
         private readonly string connectionString;
         private readonly bool setDictionaryConventionToArrayOfDocuments;
         public readonly IMongoDatabase Database;
         private readonly List<CustomConnection> customConnections = new List<CustomConnection>();
         public bool DefaultWriteLog = false;
-        public bool DefaultUnifyChars = false;
-        public bool DefaultUnifyNumbers = false;
+        public bool DefaultNormalizeStrings = false;
         private readonly Dictionary<string, object> Collections = new Dictionary<string, object>();
         private static readonly Dictionary<Type, CollectionSaveAttribute> SaveAttrsCache = new Dictionary<Type, CollectionSaveAttribute>();
 
-        public MongoHelper(PersianCharacters persianCharacters, string dbName, string connectionString, bool setDictionaryConventionToArrayOfDocuments, 
+        public MongoHelper(IStringNormalizer stringNormalizer, string dbName, string connectionString, bool setDictionaryConventionToArrayOfDocuments, 
             List<CustomConnection> customConnections = null)
         {
-            this.persianCharacters = persianCharacters;
+            this.stringNormalizer = stringNormalizer;
             this.dbName = dbName;
             this.connectionString = connectionString;
             this.setDictionaryConventionToArrayOfDocuments = setDictionaryConventionToArrayOfDocuments;
@@ -166,19 +165,17 @@ namespace AliaaCommon.MongoDB
         public void Save<T>(T item) where T : MongoEntity
         {
             bool writeLog = DefaultWriteLog;
-            bool unifyChars = DefaultUnifyChars;
-            bool unifyNums = DefaultUnifyNumbers;
+            bool normalizeStrings = DefaultNormalizeStrings;
             Type type = typeof(T);
             CollectionSaveAttribute attr = GetSaveAttribute(type);
             if (attr != null)
             {
                 writeLog = attr.WriteLog;
-                unifyChars = attr.UnifyChars;
-                unifyNums = attr.UnifyNumbers;
+                normalizeStrings = attr.NormalizeStrings;
             }
 
-            if (unifyChars)
-                persianCharacters.UnifyStringsInObject(type, item, unifyNums);
+            if (normalizeStrings && stringNormalizer != null)
+                stringNormalizer.NormalizeStringsInObject(item);
 
             ActivityType activityType;
             T oldValue = null;
