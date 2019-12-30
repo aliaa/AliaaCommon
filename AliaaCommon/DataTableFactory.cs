@@ -145,7 +145,7 @@ namespace AliaaCommon
                             sb.Remove(sb.Length - 3, 3);
                         value = sb.ToString();
                     }
-                    row[displayNames[p]] = value;
+                    row[displayNames[p]] = value == null ? DBNull.Value : value;
                 }
                 table.Rows.Add(row);
             }

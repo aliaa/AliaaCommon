@@ -78,7 +78,7 @@
     <Compile Include="Compressor.cs" />
     <Compile Include="DataTableFactory.cs" />
     <Compile Include="IStringNormalizer.cs" />
-    <Compile Include="Models\CachedData.cs" />
+    <Compile Include="CachedData.cs" />
     <Compile Include="Models\DeleteActivity.cs" />
     <Compile Include="Models\ExceptionLog.cs" />
     <Compile Include="Models\InsertActivity.cs" />
