@@ -1,9 +1,10 @@
-﻿using System;
+﻿using EasyMongoNet;
+using System;
 using System.Collections.Generic;
 
 namespace AliaaCommon.Models
 {
-    [CollectionSave(WriteLog = false, NormalizeStrings = false)]
+    [CollectionSave(WriteLog = false, Preprocess = false)]
     public class ExceptionLog : MongoEntity
     {
         public static implicit operator ExceptionLog(Exception ex)
@@ -11,7 +12,7 @@ namespace AliaaCommon.Models
             return new ExceptionLog(ex);
         }
 
-        private const int INNER_EXCEPTION_COUNT = 50;
+        private const int MAX_INNER_EXCEPTION = 50;
 
         public ExceptionLog() { }
 
@@ -30,7 +31,7 @@ namespace AliaaCommon.Models
                 List<Exception> hierarchyList = new List<Exception>();
                 hierarchyList.Add(Exception);
                 Exception current = Exception.InnerException;
-                while (current != null && !hierarchyList.Contains(current) && InnerExceptions.Count < 50)
+                while (current != null && !hierarchyList.Contains(current) && InnerExceptions.Count < MAX_INNER_EXCEPTION)
                 {
                     InnerExceptions.Add(Tuple.Create(current, current.Message, current.StackTrace));
                     hierarchyList.Add(current);

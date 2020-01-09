@@ -1,4 +1,4 @@
-﻿using AliaaCommon.MongoDB;
+﻿using EasyMongoNet;
 using MongoDB.Bson;
 using System;
 using System.Collections;
@@ -13,16 +13,16 @@ namespace AliaaCommon
     public class DataTableFactory
     {
         protected readonly Type thisType;
-        protected readonly MongoHelper DB;
+        protected readonly IDbContext DB;
 
 
-        public DataTableFactory(MongoHelper DB)
+        public DataTableFactory(IDbContext DB)
         {
             this.DB = DB;
             thisType = typeof(DataTableFactory);
         }
 
-        protected DataTableFactory(MongoHelper DB, Type thisType)
+        protected DataTableFactory(IDbContext DB, Type thisType)
         {
             this.DB = DB;
             this.thisType = thisType;
@@ -36,7 +36,7 @@ namespace AliaaCommon
             return Create(DB.All<T>(), convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns, valuesReferenceReplacement);
         }
 
-        public DataTable Create<T>(MongoHelper DB, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false,
+        public DataTable Create<T>(IDbContext DB, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false,
             string[] excludeColumns = null, Dictionary<string, Dictionary<ObjectId, string>> valuesReferenceReplacement = null) where T : MongoEntity
         {
             return Create(DB.All<T>(), convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns, valuesReferenceReplacement);

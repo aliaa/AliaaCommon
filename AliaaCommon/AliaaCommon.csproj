@@ -9,9 +9,11 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AliaaCommon</RootNamespace>
     <AssemblyName>AliaaCommon</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,36 +33,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Crc32C.NET, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Crc32C.NET.1.0.5.0\lib\net20\Crc32C.NET.dll</HintPath>
-    </Reference>
-    <Reference Include="DnsClient, Version=1.2.0.0, Culture=neutral, PublicKeyToken=4574bb5573c51424, processorArchitecture=MSIL">
-      <HintPath>..\packages\DnsClient.1.2.0\lib\net45\DnsClient.dll</HintPath>
-    </Reference>
     <Reference Include="FarsiLibrary, Version=2.5.1.5, Culture=neutral, PublicKeyToken=d1bcbd1937c9d5a3, processorArchitecture=MSIL">
       <HintPath>..\packages\Farsi.Library.2.5.1.5\lib\net35\FarsiLibrary.dll</HintPath>
     </Reference>
-    <Reference Include="MongoDB.Bson, Version=2.9.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MongoDB.Bson.2.9.2\lib\net452\MongoDB.Bson.dll</HintPath>
-    </Reference>
-    <Reference Include="MongoDB.Driver, Version=2.9.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MongoDB.Driver.2.9.2\lib\net452\MongoDB.Driver.dll</HintPath>
-    </Reference>
-    <Reference Include="MongoDB.Driver.Core, Version=2.9.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MongoDB.Driver.Core.2.9.2\lib\net452\MongoDB.Driver.Core.dll</HintPath>
+    <Reference Include="MongoDB.Bson, Version=2.10.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Tci\packages\MongoDB.Bson.2.10.0\lib\net452\MongoDB.Bson.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpCompress, Version=0.23.0.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpCompress.0.23.0\lib\net45\SharpCompress.dll</HintPath>
-    </Reference>
-    <Reference Include="Snappy.NET, Version=1.1.1.8, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Snappy.NET.1.1.1.8\lib\net45\Snappy.NET.dll</HintPath>
+      <HintPath>..\..\Tci\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Buffers.4.5.0\lib\netstandard1.1\System.Buffers.dll</HintPath>
+    <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\Tci\packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
@@ -79,25 +63,12 @@
     <Compile Include="DataTableFactory.cs" />
     <Compile Include="IStringNormalizer.cs" />
     <Compile Include="CachedData.cs" />
-    <Compile Include="Models\DeleteActivity.cs" />
-    <Compile Include="Models\ExceptionLog.cs" />
-    <Compile Include="Models\InsertActivity.cs" />
-    <Compile Include="Models\UpdateActivity.cs" />
-    <Compile Include="MongoDB\CustomSerializationProvider.cs" />
-    <Compile Include="MongoDB\DBStatics.cs" />
-    <Compile Include="MongoDB\CollectionOptionsAttribute.cs" />
-    <Compile Include="MongoDB\CollectionSaveAttribute.cs" />
     <Compile Include="DisplayNameXAttribute.cs" />
     <Compile Include="HSLColor.cs" />
     <Compile Include="HttpHeadersCleanup.cs" />
     <Compile Include="License.cs" />
     <Compile Include="Models\AuthUser.cs" />
-    <Compile Include="MongoDB\DictionaryPresentationConvention.cs" />
-    <Compile Include="MongoDB\LocalDateTimeSerializer.cs" />
-    <Compile Include="MongoDB\MongoHelper.cs" />
-    <Compile Include="MongoDB\MongoEntity.cs" />
-    <Compile Include="MongoDB\MongoIndexAttribute.cs" />
-    <Compile Include="ObjectIdJsonConverter.cs" />
+    <Compile Include="Models\ExceptionLog.cs" />
     <Compile Include="StringNormalizer.cs" />
     <Compile Include="Pipelining\PipelineEndTask.cs" />
     <Compile Include="Pipelining\PipelineMiddleTask.cs" />
@@ -105,7 +76,6 @@
     <Compile Include="Pipelining\PipelineStartingTask.cs" />
     <Compile Include="Pipelining\PipelineTask.cs" />
     <Compile Include="TimeSpanJsonConverter.cs" />
-    <Compile Include="Models\UserActivity.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WebControls\ObjectEditorTable.cs" />
@@ -118,6 +88,12 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\EasyMongoNet\EasyMongoNet.csproj">
+      <Project>{65be2a14-c447-4679-a0e5-13f7441da88e}</Project>
+      <Name>EasyMongoNet</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

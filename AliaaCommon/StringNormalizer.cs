@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using EasyMongoNet;
 using Newtonsoft.Json;
 
 namespace AliaaCommon
@@ -89,7 +90,7 @@ namespace AliaaCommon
             return sb.ToString();
         }
 
-        public void NormalizeStringsInObject(object obj)
+        public void Preprocess(object obj)
         {
             Type type = obj.GetType();
             foreach (PropertyInfo p in type.GetProperties())
@@ -117,16 +118,16 @@ namespace AliaaCommon
                         catch { continue; }
                     }
                 }
-                else if (p.PropertyType.IsSubclassOf(typeof(MongoEntity)))
+                else if (p.PropertyType.IsSubclassOf(typeof(IMongoEntity)))
                 {
-                    NormalizeStringsInObject(p.GetValue(obj));
+                    Preprocess(p.GetValue(obj));
                 }
                 else if (value is IEnumerable)
                 {
                     IEnumerable array = value as IEnumerable;
                     foreach (var item in array)
                         if (item != null)
-                            NormalizeStringsInObject(item);
+                            Preprocess(item);
                 }
             }
         }

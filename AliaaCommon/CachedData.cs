@@ -1,17 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AliaaCommon.Models
 {
     public class CachedData<T>
     {
-        public Func<T, T> AutoRefreshFunc { get; set; }
+        public Func<T, T> RefreshFunc { get; set; }
 
         public DateTime CacheTime { get; private set; }
-        public TimeSpan ExpirationDuration { get; private set; }
+        public TimeSpan ExpireDuration { get; private set; }
 
         private T _data;
         public T Data
@@ -23,24 +19,43 @@ namespace AliaaCommon.Models
             }
             get
             {
-                if (IsExpired && AutoRefreshFunc != null)
-                    Data = AutoRefreshFunc(_data);
+                if (IsExpired && RefreshFunc != null)
+                    Data = RefreshFunc(_data);
                 return _data;
             }
         }
 
-        public CachedData(T Data, TimeSpan ExpirationDuration)
+        public CachedData(T Data, TimeSpan ExpireDuration)
         {
             this.Data = Data;
-            this.ExpirationDuration = ExpirationDuration;
+            this.ExpireDuration = ExpireDuration;
+            this.CacheTime = DateTime.Now;
         }
 
-        public CachedData(T Data, int expireAfterSeconds)
+        public CachedData(T Data, int ExpireSeconds)
         {
             this.Data = Data;
-            ExpirationDuration = new TimeSpan(0, 0, expireAfterSeconds);
+            ExpireDuration = new TimeSpan(0, 0, ExpireSeconds);
+            this.CacheTime = DateTime.Now;
         }
 
-        public bool IsExpired => DateTime.Now > CacheTime.Add(ExpirationDuration);
+        public CachedData(Func<T, T> RefreshFunc, TimeSpan ExpireDuration)
+        {
+            this.RefreshFunc = RefreshFunc;
+            this.ExpireDuration = ExpireDuration;
+        }
+
+        public CachedData(Func<T, T> RefreshFunc, int ExpireSeconds)
+        {
+            this.RefreshFunc = RefreshFunc;
+            this.ExpireDuration = new TimeSpan(0, 0, ExpireSeconds);
+        }
+
+        public bool IsExpired => DateTime.Now > CacheTime.Add(ExpireDuration);
+
+        public static implicit operator T(CachedData<T> cachedData)
+        {
+            return cachedData.Data;
+        }
     }
 }

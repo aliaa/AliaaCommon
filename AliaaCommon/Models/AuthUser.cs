@@ -1,19 +1,16 @@
-﻿using AliaaCommon.MongoDB;
-using MongoDB.Bson;
+﻿using EasyMongoNet;
 using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace AliaaCommon.Models
 {
-    [MongoIndex(Fields: new string[] { nameof(Username) }, Unique = true)]
+    [CollectionIndex(Fields: new string[] { nameof(Username) }, Unique = true)]
     [BsonIgnoreExtraElements]
     [CollectionSave(WriteLog = true)]
     public class AuthUser : MongoEntity
@@ -68,22 +65,22 @@ namespace AliaaCommon.Models
             return Convert.ToBase64String(hash).Replace('+', '-').Replace('/', '_').Replace("=", "");
         }
 
-        public static AuthUser CheckAuthentication(this MongoHelper DB, string username, string password, bool passwordIsHashed = false)
+        public static AuthUser CheckAuthentication(this IDbContext DB, string username, string password, bool passwordIsHashed = false)
         {
             string hash;
             if (passwordIsHashed)
                 hash = password;
             else
                 hash = GetHash(password);
-            return DB.Find<AuthUser>(u => u.Username == username && u.HashedPassword == hash && u.Disabled != true).FirstOrDefault();
+            return DB.FindFirst<AuthUser>(u => u.Username == username && u.HashedPassword == hash && u.Disabled != true);
         }
 
-        public static AuthUser GetUserByUsername(this MongoHelper DB, string username)
+        public static AuthUser GetUserByUsername(this IDbContext DB, string username)
         {
-            return DB.Find<AuthUser>(u => u.Username == username).FirstOrDefault();
+            return DB.FindFirst<AuthUser>(u => u.Username == username);
         }
 
-        public static AuthUser GetCurrentUser(this MongoHelper DB)
+        public static AuthUser GetCurrentUser(this IDbContext DB)
         {
             if (HttpContext.Current == null || HttpContext.Current.User == null || HttpContext.Current.User.Identity == null || string.IsNullOrEmpty(HttpContext.Current.User.Identity.Name))
                 return null;
