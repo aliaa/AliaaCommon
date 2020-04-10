@@ -13,18 +13,18 @@ namespace AliaaCommon
     public class DataTableFactory
     {
         protected readonly Type thisType;
-        protected readonly IDbContext DB;
+        protected readonly IReadOnlyDbContext db;
 
 
-        public DataTableFactory(IDbContext DB)
+        public DataTableFactory(IReadOnlyDbContext db)
         {
-            this.DB = DB;
+            this.db = db;
             thisType = typeof(DataTableFactory);
         }
 
-        protected DataTableFactory(IDbContext DB, Type thisType)
+        protected DataTableFactory(IReadOnlyDbContext db, Type thisType)
         {
-            this.DB = DB;
+            this.db = db;
             this.thisType = thisType;
         }
         
@@ -33,13 +33,13 @@ namespace AliaaCommon
         public DataTable Create<T>(bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, 
             string[] excludeColumns = null, Dictionary<string, Dictionary<ObjectId, string>> valuesReferenceReplacement = null) where T : MongoEntity
         {
-            return Create(DB.All<T>(), convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns, valuesReferenceReplacement);
+            return Create(db.All<T>(), convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns, valuesReferenceReplacement);
         }
 
-        public DataTable Create<T>(IDbContext DB, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false,
+        public DataTable Create<T>(IReadOnlyDbContext db, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false,
             string[] excludeColumns = null, Dictionary<string, Dictionary<ObjectId, string>> valuesReferenceReplacement = null) where T : MongoEntity
         {
-            return Create(DB.All<T>(), convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns, valuesReferenceReplacement);
+            return Create(db.All<T>(), convertDateToPersian, includeTimeInDates, addIndexColumn, excludeColumns, valuesReferenceReplacement);
         }
 
         public DataTable Create<T>(IEnumerable<T> data, bool convertDateToPersian = true, bool includeTimeInDates = true, bool addIndexColumn = false, 

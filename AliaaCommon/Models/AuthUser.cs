@@ -64,26 +64,26 @@ namespace AliaaCommon.Models
             return Convert.ToBase64String(hash).Replace('+', '-').Replace('/', '_').Replace("=", "");
         }
 
-        public static AuthUser CheckAuthentication(this IDbContext DB, string username, string password, bool passwordIsHashed = false)
+        public static AuthUser CheckAuthentication(this IReadOnlyDbContext db, string username, string password, bool passwordIsHashed = false)
         {
             string hash;
             if (passwordIsHashed)
                 hash = password;
             else
                 hash = GetHash(password);
-            return DB.FindFirst<AuthUser>(u => u.Username == username && u.HashedPassword == hash && u.Disabled != true);
+            return db.FindFirst<AuthUser>(u => u.Username == username && u.HashedPassword == hash && u.Disabled != true);
         }
 
-        public static AuthUser GetUserByUsername(this IDbContext DB, string username)
+        public static AuthUser GetUserByUsername(this IReadOnlyDbContext db, string username)
         {
-            return DB.FindFirst<AuthUser>(u => u.Username == username);
+            return db.FindFirst<AuthUser>(u => u.Username == username);
         }
 
-        public static AuthUser GetCurrentUser(this IDbContext DB)
+        public static AuthUser GetCurrentUser(this IReadOnlyDbContext db)
         {
             if (HttpContext.Current == null || HttpContext.Current.User == null || HttpContext.Current.User.Identity == null || string.IsNullOrEmpty(HttpContext.Current.User.Identity.Name))
                 return null;
-            return GetUserByUsername(DB, HttpContext.Current.User.Identity.Name);
+            return GetUserByUsername(db, HttpContext.Current.User.Identity.Name);
         }
     }
 }
