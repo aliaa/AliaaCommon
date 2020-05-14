@@ -1,25 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.ComponentModel;
 using System.Web;
 
 namespace AliaaCommon
 {
     [AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
-    public class DisplayNameXAttribute : Attribute
+    public class DisplayNameXAttribute : DisplayNameAttribute
     {
-        public DisplayNameXAttribute(string name)
+        public DisplayNameXAttribute(string name) : base(name) { }
+
+        private bool fromResource;
+        private string resourceName;
+
+        public DisplayNameXAttribute(string resourceName, bool fromResource)
         {
-            this.DisplayName = name;
+            this.fromResource = fromResource;
+            this.resourceName = resourceName;
         }
 
-        public DisplayNameXAttribute(bool fromResource, string resourceName)
+        public override string DisplayName
         {
-            if (fromResource)
-                DisplayName = (string)HttpContext.GetGlobalResourceObject("Res", resourceName);
+            get
+            {
+                if(fromResource)
+                    return (string)HttpContext.GetGlobalResourceObject("Res", resourceName);
+                return base.DisplayName;
+            }
         }
-
-        public string DisplayName { get; private set; }
         
     }
 }

@@ -33,9 +33,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FarsiLibrary, Version=2.5.1.5, Culture=neutral, PublicKeyToken=d1bcbd1937c9d5a3, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Farsi.Library.2.5.1.5\lib\net35\FarsiLibrary.dll</HintPath>
-    </Reference>
     <Reference Include="MongoDB.Bson, Version=2.10.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\MongoDB.Bson.2.10.0\lib\net452\MongoDB.Bson.dll</HintPath>
     </Reference>
@@ -57,30 +54,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Compressor.cs" />
-    <Compile Include="DataTableFactory.cs" />
-    <Compile Include="IStringNormalizer.cs" />
-    <Compile Include="CachedData.cs" />
     <Compile Include="DisplayNameXAttribute.cs" />
-    <Compile Include="HSLColor.cs" />
     <Compile Include="HttpHeadersCleanup.cs" />
-    <Compile Include="License.cs" />
-    <Compile Include="Models\AuthUser.cs" />
-    <Compile Include="Models\ExceptionLog.cs" />
-    <Compile Include="StringNormalizer.cs" />
+    <Compile Include="Models\AuthUserDBExtentionX.cs" />
     <Compile Include="Pipelining\PipelineEndTask.cs" />
     <Compile Include="Pipelining\PipelineMiddleTask.cs" />
     <Compile Include="Pipelining\Pipeliner.cs" />
     <Compile Include="Pipelining\PipelineStartingTask.cs" />
     <Compile Include="Pipelining\PipelineTask.cs" />
-    <Compile Include="TimeSpanJsonConverter.cs" />
-    <Compile Include="Utils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="HttpContextUtils.cs" />
     <Compile Include="WebControls\ObjectEditorTable.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="PersianCharsMap.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <None Include="app.config" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
@@ -90,6 +76,10 @@
     <ProjectReference Include="..\..\EasyMongoNet\EasyMongoNet.csproj">
       <Project>{65be2a14-c447-4679-a0e5-13f7441da88e}</Project>
       <Name>EasyMongoNet</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AliaaCommonStandard\AliaaCommonStandard.csproj">
+      <Project>{aed2ea88-e5b7-4f90-bb0a-69d307152114}</Project>
+      <Name>AliaaCommonStandard</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

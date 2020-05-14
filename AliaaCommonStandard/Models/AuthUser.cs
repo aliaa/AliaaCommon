@@ -2,10 +2,10 @@
 using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography;
 using System.Text;
-using System.Web;
 
 namespace AliaaCommon.Models
 {
@@ -15,7 +15,7 @@ namespace AliaaCommon.Models
     public class AuthUser : MongoEntity
     {
         [Required]
-        [DisplayNameX("نام کاربری")]
+        [DisplayName("نام کاربری")]
         public string Username { get; set; }
 
         public string HashedPassword { get; set; }
@@ -23,14 +23,14 @@ namespace AliaaCommon.Models
         public bool IsAdmin { get; set; }
         
         [Required]
-        [DisplayNameX("نام")]
+        [DisplayName("نام")]
         public string FirstName { get; set; }
         
         [Required]
-        [DisplayNameX("نام خانوادگی")]
+        [DisplayName("نام خانوادگی")]
         public string LastName { get; set; }
 
-        [DisplayNameX("غیر فعال شده")]
+        [DisplayName("غیر فعال شده")]
         public bool Disabled { get; set; }
 
         public List<string> Applications { get; set; } = new List<string>();
@@ -77,13 +77,6 @@ namespace AliaaCommon.Models
         public static AuthUser GetUserByUsername(this IReadOnlyDbContext db, string username)
         {
             return db.FindFirst<AuthUser>(u => u.Username == username);
-        }
-
-        public static AuthUser GetCurrentUser(this IReadOnlyDbContext db)
-        {
-            if (HttpContext.Current == null || HttpContext.Current.User == null || HttpContext.Current.User.Identity == null || string.IsNullOrEmpty(HttpContext.Current.User.Identity.Name))
-                return null;
-            return GetUserByUsername(db, HttpContext.Current.User.Identity.Name);
         }
     }
 }

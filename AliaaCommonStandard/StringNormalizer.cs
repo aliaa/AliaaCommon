@@ -12,6 +12,8 @@ namespace AliaaCommon
 
     public class StringNormalizer : IStringNormalizer
     {
+        public const string JSON_FILE_NAME = "PersianCharsMap.json";
+
         public class CharsData
         {
             public HashSet<char> IgnoredChars { get; set; }
@@ -23,13 +25,7 @@ namespace AliaaCommon
         private readonly CharsData charsData;
         public bool AlsoMapNumberDigits { get; set; } = false;
 
-        private static StringNormalizer _instance = null;
-        public static StringNormalizer GetInstance(string jsonFilePath)
-        {
-            if (_instance == null)
-                _instance = new StringNormalizer(jsonFilePath);
-            return _instance;
-        }
+        public StringNormalizer() : this(JSON_FILE_NAME) { }
 
         public StringNormalizer(string jsonFilePath)
         {
