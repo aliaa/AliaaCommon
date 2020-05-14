@@ -111,6 +111,9 @@ namespace AliaaCommon
 
         public static float GetSimilarityRateOfStrings(string s1, string s2)
         {
+            if (s1 == null || s2 == null)
+                return s1 == s2 ? 1 : 0;
+
             string bigger, smaller;
             if (s1.Length > s2.Length)
             {
