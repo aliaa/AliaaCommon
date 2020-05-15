@@ -20,6 +20,7 @@ namespace AliaaCommon.Models
 
         public string HashedPassword { get; set; }
 
+        [DisplayName("مدیر سیستم است؟")]
         public bool IsAdmin { get; set; }
         
         [Required]
