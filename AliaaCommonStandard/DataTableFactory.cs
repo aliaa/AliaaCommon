@@ -73,7 +73,7 @@ namespace AliaaCommon
             {
                 if (excludeColumns != null && excludeColumns.Contains(p.Name))
                     continue;
-                string dispName = Utils.GetDisplayNameOfMember(p);
+                string dispName = Utils.DisplayName(p);
                 displayNames.Add(p, dispName);
                 if (table.Columns.Contains(dispName))
                     continue;
@@ -128,7 +128,7 @@ namespace AliaaCommon
                             value = value.ToString();
                     }
                     else if (p.PropertyType.IsEnum)
-                        value = Utils.GetDisplayNameOfMember(p.PropertyType, value.ToString());
+                        value = Utils.DisplayName(p.PropertyType, value.ToString());
                     else if (value is DateTime && convertDateToPersian)
                         value = PersianDateUtils.GetPersianDateString((DateTime)value, includeTimeInDates);
                     else if (value is IEnumerable && !(value is string))
@@ -139,7 +139,7 @@ namespace AliaaCommon
                         {
                             if (itemsType == null)
                                 itemsType = v.GetType();
-                            sb.Append(Utils.GetDisplayNameOfMember(itemsType, v.ToString())).Append(" ; ");
+                            sb.Append(Utils.DisplayName(itemsType, v.ToString())).Append(" ; ");
                         }
                         if (sb.Length > 3)
                             sb.Remove(sb.Length - 3, 3);

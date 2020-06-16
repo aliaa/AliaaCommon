@@ -51,7 +51,7 @@ namespace AliaaCommon.WebControls
                     i += columnCount - (i % columnCount);
                 }
 
-                Label lbl = new Label { Text = Utils.GetDisplayNameOfMember(prop) + ":" };
+                Label lbl = new Label { Text = Utils.DisplayName(prop) + ":" };
                 TableCell titleCell = new TableCell();
                 titleCell.Controls.Add(lbl);
                 row.Cells.Add(titleCell);
@@ -108,7 +108,7 @@ namespace AliaaCommon.WebControls
                             for (int j = 0; j < enumVals.Length; j++)
                             {
                                 string name = enumVals.GetValue(j).ToString();
-                                string dispName = Utils.GetDisplayNameOfMember(ptype, name);
+                                string dispName = Utils.DisplayName(ptype, name);
                                 (ctrl as DropDownList).Items.Add(new ListItem(dispName, name));
                             }
                         }

@@ -25,7 +25,7 @@ namespace AliaaCommon
             return ACCEPTABLE_FILE_EXTENTIONS_TO_UPLOAD.Contains(fileExtention);
         }
 
-        public static string GetDisplayNameOfMember(MemberInfo member)
+        public static string DisplayName(MemberInfo member)
         {
             if (member == null)
                 return null;
@@ -40,15 +40,15 @@ namespace AliaaCommon
             return member.Name;
         }
 
-        public static string GetDisplayNameOfMember(Type classType, string memberName)
+        public static string DisplayName(Type classType, string memberName)
         {
             MemberInfo[] members = classType.GetMember(memberName);
             if (members == null || members.Length == 0)
                 return memberName;
-            return GetDisplayNameOfMember(members[0]);
+            return DisplayName(members[0]);
         }
 
-        public static string GetDisplayNameOfMember<TClass>(Expression<Func<TClass, object>> p)
+        public static string DisplayName<TClass>(Expression<Func<TClass, object>> p)
         {
             string memberName;
             if (p.Body is MemberExpression)
@@ -57,7 +57,7 @@ namespace AliaaCommon
                 memberName = ((p.Body as UnaryExpression).Operand as MemberExpression).Member.Name;
             else
                 throw new NotImplementedException();
-            return GetDisplayNameOfMember(typeof(TClass), memberName);
+            return DisplayName(typeof(TClass), memberName);
         }
 
         public static PhysicalAddress GetMacAddress()
