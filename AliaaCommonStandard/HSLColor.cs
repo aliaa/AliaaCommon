@@ -10,6 +10,7 @@ namespace AliaaCommon
         private double hue = 1.0;
         private double saturation = 1.0;
         private double luminosity = 1.0;
+        private double alpha = 1.0;
 
         private const double scale = 240.0;
 
@@ -29,6 +30,12 @@ namespace AliaaCommon
             set { luminosity = CheckRange(value / scale); }
         }
 
+        public double Alpha
+        {
+            get { return alpha * scale; }
+            set { alpha = CheckRange(value / scale); }
+        }
+
         private double CheckRange(double value)
         {
             if (value < 0.0)
@@ -40,7 +47,7 @@ namespace AliaaCommon
 
         public override string ToString()
         {
-            return String.Format("H: {0:#0.##} S: {1:#0.##} L: {2:#0.##}", Hue, Saturation, Luminosity);
+            return String.Format("H: {0:#0.##} S: {1:#0.##} L: {2:#0.##} A: {3:#0.##}", Hue, Saturation, Luminosity, Alpha);
         }
 
         public string ToRGBString()
@@ -52,7 +59,7 @@ namespace AliaaCommon
         public string ToHexString()
         {
             Color color = (Color)this;
-            return "#" + GetHex(color.R) + GetHex(color.G) + GetHex(color.B);
+            return "#" + GetHex(color.R) + GetHex(color.G) + GetHex(color.B) + GetHex(color.A);
         }
 
         private static string GetHex(byte b)
@@ -85,7 +92,7 @@ namespace AliaaCommon
                     b = GetColorComponent(temp1, temp2, hslColor.hue - 1.0 / 3.0);
                 }
             }
-            return Color.FromArgb((int)(255 * r), (int)(255 * g), (int)(255 * b));
+            return Color.FromArgb((int)(255 * hslColor.alpha), (int)(255 * r), (int)(255 * g), (int)(255 * b));
         }
 
         private static double GetColorComponent(double temp1, double temp2, double temp3)
@@ -124,6 +131,7 @@ namespace AliaaCommon
             hslColor.hue = color.GetHue() / 360.0; // we store hue as 0-1 as opposed to 0-360 
             hslColor.luminosity = color.GetBrightness();
             hslColor.saturation = color.GetSaturation();
+            hslColor.alpha = color.A / 255.0;
             return hslColor;
         }
         #endregion
@@ -140,16 +148,19 @@ namespace AliaaCommon
         public HSLColor(Color color)
         {
             SetRGB(color.R, color.G, color.B);
+            this.alpha = color.A / 255.0;
         }
-        public HSLColor(int red, int green, int blue)
+        public HSLColor(int red, int green, int blue, int alpha = 255)
         {
             SetRGB(red, green, blue);
+            this.alpha = alpha / 255.0;
         }
-        public HSLColor(double hue, double saturation, double luminosity)
+        public HSLColor(double hue, double saturation, double luminosity, double alpha = scale)
         {
             this.Hue = hue;
             this.Saturation = saturation;
             this.Luminosity = luminosity;
+            this.Alpha = alpha;
         }
 
     }

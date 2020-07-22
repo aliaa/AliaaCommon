@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
@@ -48,7 +49,7 @@ namespace AliaaCommon
             return DisplayName(members[0]);
         }
 
-        public static string DisplayName<TClass>(Expression<Func<TClass, object>> p)
+        public static string DisplayName<T>(Expression<Func<T, object>> p)
         {
             string memberName;
             if (p.Body is MemberExpression)
@@ -57,7 +58,18 @@ namespace AliaaCommon
                 memberName = ((p.Body as UnaryExpression).Operand as MemberExpression).Member.Name;
             else
                 throw new NotImplementedException();
-            return DisplayName(typeof(TClass), memberName);
+            return DisplayName(typeof(T), memberName);
+        }
+
+        public static string DisplayName<E>(E value) where E : struct, IConvertible
+        {
+            var fieldInfo = value.GetType().GetField(value.ToString());
+            return DisplayName(fieldInfo);
+        }
+
+        public static IEnumerable<E> GetEnumValues<E>() where E : struct, IConvertible
+        {
+            return Enum.GetValues(typeof(E)).Cast<E>();
         }
 
         public static PhysicalAddress GetMacAddress()
