@@ -71,9 +71,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\EasyMongoNet\EasyMongoNet.csproj">
-      <Project>{65be2a14-c447-4679-a0e5-13f7441da88e}</Project>
-      <Name>EasyMongoNet</Name>
+    <ProjectReference Include="..\..\EasyMongoNet\Driver\EasyMongoNet.Driver.csproj">
+      <Project>{3f25e000-7cc7-4cb5-bd83-6bed4e4f52ea}</Project>
+      <Name>EasyMongoNet.Driver</Name>
     </ProjectReference>
     <ProjectReference Include="..\AliaaCommonStandard\AliaaCommonStandard.csproj">
       <Project>{aed2ea88-e5b7-4f90-bb0a-69d307152114}</Project>

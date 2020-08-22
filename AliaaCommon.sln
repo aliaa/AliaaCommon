@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliaaCommon", "AliaaCommon\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AliaaCommonStandard", "AliaaCommonStandard\AliaaCommonStandard.csproj", "{5E0096F7-080A-4A91-AF2A-5A8A89C8BDDB}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyMongoNet.Definitions", "..\EasyMongoNet\Definitions\EasyMongoNet.Definitions.csproj", "{234C5FD2-F155-4162-B272-CF396B595F30}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyMongoNet.Driver", "..\EasyMongoNet\Driver\EasyMongoNet.Driver.csproj", "{3F25E000-7CC7-4CB5-BD83-6BED4E4F52EA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{5E0096F7-080A-4A91-AF2A-5A8A89C8BDDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5E0096F7-080A-4A91-AF2A-5A8A89C8BDDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5E0096F7-080A-4A91-AF2A-5A8A89C8BDDB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{234C5FD2-F155-4162-B272-CF396B595F30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{234C5FD2-F155-4162-B272-CF396B595F30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{234C5FD2-F155-4162-B272-CF396B595F30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{234C5FD2-F155-4162-B272-CF396B595F30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F25E000-7CC7-4CB5-BD83-6BED4E4F52EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F25E000-7CC7-4CB5-BD83-6BED4E4F52EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F25E000-7CC7-4CB5-BD83-6BED4E4F52EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F25E000-7CC7-4CB5-BD83-6BED4E4F52EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

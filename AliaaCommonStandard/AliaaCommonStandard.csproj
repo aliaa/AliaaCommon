@@ -15,7 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\EasyMongoNet\EasyMongoNet.csproj" />
+    <ProjectReference Include="..\..\EasyMongoNet\Definitions\EasyMongoNet.Definitions.csproj" />
+    <ProjectReference Include="..\..\EasyMongoNet\Driver\EasyMongoNet.Driver.csproj" />
   </ItemGroup>
 
   <ItemGroup>
