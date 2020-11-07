@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="PersianCharsMap.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="PersianCharsMap.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\EasyMongoNet\Definitions\EasyMongoNet.Definitions.csproj" />
+    <ProjectReference Include="..\..\EasyMongoNet\Driver\EasyMongoNet.Driver.csproj" />
+    <ProjectReference Include="..\AliaaCommon\AliaaCommon.csproj" />
+  </ItemGroup>
+
+</Project>

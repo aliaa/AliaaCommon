@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web;
 
-namespace AliaaCommon
+namespace AliaaCommon.Asp
 {
     public class HttpHeadersCleanup : IHttpModule
     {

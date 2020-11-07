@@ -15,10 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\EasyMongoNet\Definitions\EasyMongoNet.Definitions.csproj" />
     <ProjectReference Include="..\..\EasyMongoNet\Driver\EasyMongoNet.Driver.csproj" />
   </ItemGroup>
