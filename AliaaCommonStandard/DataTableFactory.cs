@@ -15,6 +15,10 @@ namespace AliaaCommon
         protected readonly Type thisType;
         protected readonly IReadOnlyDbContext db;
 
+        public DataTableFactory() 
+        {
+            thisType = typeof(DataTableFactory);
+        }
 
         public DataTableFactory(IReadOnlyDbContext db)
         {

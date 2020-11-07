@@ -19,6 +19,8 @@ namespace AliaaCommon
 
         public static string GetPersianDateString(DateTime date, bool includeTime = true)
         {
+            if (date.Year < 1000)
+                return null;
             try
             {
                 if (includeTime)
@@ -46,6 +48,13 @@ namespace AliaaCommon
                 if (secondSeparatorIndex < 0)
                     secondSeparatorIndex = date.IndexOf('-', firstSeparatorIndex + 1);
                 year = int.Parse(date.Substring(0, firstSeparatorIndex));
+                if (year < 100)
+                {
+                    if (year >= 50)
+                        year += 1300;
+                    else
+                        year += 1400;
+                }
                 month = int.Parse(date.Substring(firstSeparatorIndex + 1, secondSeparatorIndex - firstSeparatorIndex - 1));
                 day = int.Parse(date.Substring(secondSeparatorIndex + 1, date.Length - secondSeparatorIndex - 1));
             }
