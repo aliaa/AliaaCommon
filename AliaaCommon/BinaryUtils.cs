@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography;
 
-namespace AliaaCommonStandard
+namespace AliaaCommon
 {
     public static class BinaryUtils
     {

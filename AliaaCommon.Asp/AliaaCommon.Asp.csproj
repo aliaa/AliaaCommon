@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{10666660-095D-4878-99CF-3E5CAB5B575A}</ProjectGuid>
+    <ProjectGuid>{40EE07AC-129E-4FBD-BA14-475124D72FB3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AliaaCommon</RootNamespace>
@@ -53,18 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Compressor.cs" />
-    <Compile Include="DisplayNameXAttribute.cs" />
-    <Compile Include="HttpHeadersCleanup.cs" />
-    <Compile Include="Models\AuthUserDBExtentionX.cs" />
-    <Compile Include="Pipelining\PipelineEndTask.cs" />
-    <Compile Include="Pipelining\PipelineMiddleTask.cs" />
-    <Compile Include="Pipelining\Pipeliner.cs" />
-    <Compile Include="Pipelining\PipelineStartingTask.cs" />
-    <Compile Include="Pipelining\PipelineTask.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="HttpContextUtils.cs" />
-    <Compile Include="WebControls\ObjectEditorTable.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -83,6 +72,10 @@
       <Project>{0d888a2e-4dcf-4b4a-8ae4-8fc35ef2545a}</Project>
       <Name>AliaaCommon</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\" />
+    <Folder Include="WebControls\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

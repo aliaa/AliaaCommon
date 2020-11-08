@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Text;
 
-namespace AliaaCommonStandard
+namespace AliaaCommon
 {
     public static class StringUtils
     {

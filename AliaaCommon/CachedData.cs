@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AliaaCommon.Models
+namespace AliaaCommon
 {
     public class CachedData<T>
     {
