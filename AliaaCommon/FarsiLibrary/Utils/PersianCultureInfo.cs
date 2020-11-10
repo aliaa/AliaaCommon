@@ -90,7 +90,8 @@ namespace FarsiLibrary.Utils
                 //Make format information readonly to fix
                 //cloning problems that might happen with 
                 //other controls.
-                ReflectionHelper.SetField(format, FieldNames.IsReadonly, true);
+                // Aliaa commented:
+                //ReflectionHelper.SetField(format, FieldNames.IsReadonly, true);
             }
 
             return format;
