@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AliaaCommon.Server", "Aliaa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AliaaCommon", "AliaaCommon\AliaaCommon.csproj", "{0D888A2E-4DCF-4B4A-8AE4-8FC35EF2545A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AliaaCommon.Blazor", "AliaaCommon.Blazor\AliaaCommon.Blazor.csproj", "{8C41CDEF-AD75-40C7-B358-C7EDC9F0857C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{0D888A2E-4DCF-4B4A-8AE4-8FC35EF2545A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D888A2E-4DCF-4B4A-8AE4-8FC35EF2545A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D888A2E-4DCF-4B4A-8AE4-8FC35EF2545A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C41CDEF-AD75-40C7-B358-C7EDC9F0857C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C41CDEF-AD75-40C7-B358-C7EDC9F0857C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C41CDEF-AD75-40C7-B358-C7EDC9F0857C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C41CDEF-AD75-40C7-B358-C7EDC9F0857C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
