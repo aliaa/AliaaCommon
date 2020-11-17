@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using System;
 using System.Collections.Generic;
 
-namespace AliaaCommon.Blazor
+namespace AliaaCommon.Blazor.Utils
 {
     // copied from https://remibou.github.io/Using-the-Blazor-form-validation/
     public class ServerSideValidator : ComponentBase

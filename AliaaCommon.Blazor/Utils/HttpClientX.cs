@@ -11,7 +11,7 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AliaaCommon.Blazor
+namespace AliaaCommon.Blazor.Utils
 {
     public class HttpClientX : HttpClient
     {
@@ -28,6 +28,7 @@ namespace AliaaCommon.Blazor
             this.js = js;
             jsonOptions = new JsonSerializerOptions();
             jsonOptions.Converters.Add(new JsonStringEnumConverter());
+            jsonOptions.Converters.Add(new DictionaryIntConverter());
             jsonOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         }
 
