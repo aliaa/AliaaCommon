@@ -1,95 +1,97 @@
 ﻿@typeparam T
 @using MongoDB.Bson.Serialization.Attributes
 
-<table class="table table-striped table-bordered table-sm">
-    <thead>
-        <tr>
-            @if (LinkColumns != null)
-            {
-                for (int i = 0; i < LinkColumns.Length; i++)
-                {
-                    <th></th>
-                }
-            }
-            @if (ActionColumns != null)
-            {
-                for (int i = 0; i < ActionColumns.Length; i++)
-                {
-                    <th></th>
-                }
-            }
-            @foreach (var f in Fields)
-            {
-                <th>@(DisplayUtils.DisplayName(f))</th>
-            }
-        </tr>
-    </thead>
-    <tbody>
-        @{ int j = 0; }
-        @foreach (var item in Data)
-        {
+<div class="@(StickyHead ? "tableFixHead" : "")" style="@(Height.HasValue && StickyHead ? "height: " + Height.Value + "px;" : "") @(Width.HasValue ? "width: " + Width.Value + "px;" : "")">
+    <table class="table table-striped table-bordered table-sm">
+        <thead>
             <tr>
                 @if (LinkColumns != null)
                 {
-                    @foreach (var col in LinkColumns)
+                    for (int i = 0; i < LinkColumns.Length; i++)
                     {
-                        <td>
-                            <a href="@(col.Link.Replace("{" + col.KeyFieldName + "}", col.KeyField.GetValue(item).ToString()))">@col.Text</a>
-                        </td>
+                        <th></th>
                     }
                 }
                 @if (ActionColumns != null)
                 {
-                    @foreach (var col in ActionColumns)
+                    for (int i = 0; i < ActionColumns.Length; i++)
                     {
-                        <td>
-                            <button class="btn btn-primary btn-sm" @onclick="() => HandleActionClick(col.Name, item)">@col.Text</button>
-                        </td>
+                        <th></th>
                     }
                 }
                 @foreach (var f in Fields)
                 {
-                    var val = f.GetValue(item);
-                    <td @attributes="CellAttrs(f.Name, j)">
-                        @if (val is bool)
+                    <th>@(DisplayUtils.DisplayName(f))</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @{ int j = 0; }
+            @foreach (var item in Data)
+            {
+                <tr>
+                    @if (LinkColumns != null)
+                    {
+                        @foreach (var col in LinkColumns)
                         {
-                            <input type="checkbox" disabled checked="@((bool)val)" />
+                            <td>
+                                <a href="@(col.Link.Replace("{" + col.KeyFieldName + "}", col.KeyField.GetValue(item).ToString()))">@col.Text</a>
+                            </td>
                         }
-                        else if (val is DateTime || (val != null && val is DateTime?))
+                    }
+                    @if (ActionColumns != null)
+                    {
+                        @foreach (var col in ActionColumns)
                         {
-                            if (val is DateTime?)
-                                val = ((DateTime?)val).Value;
-                            if (ConvertDatesToPersion)
+                            <td>
+                                <button class="btn btn-primary btn-sm" @onclick="() => HandleActionClick(col.Name, item)">@col.Text</button>
+                            </td>
+                        }
+                    }
+                    @foreach (var f in Fields)
+                    {
+                        var val = f.GetValue(item);
+                        <td @attributes="CellAttrs(f.Name, j)">
+                            @if (val is bool)
                             {
-                                @AliaaCommon.PersianDateUtils.GetPersianDateString((DateTime)val, !ShortDates);
+                                <input type="checkbox" disabled checked="@((bool)val)" />
                             }
-                            else
+                            else if (val is DateTime || (val != null && val is DateTime?))
                             {
-                                if (ShortDates)
+                                if (val is DateTime?)
+                                    val = ((DateTime?)val).Value;
+                                if (ConvertDatesToPersion)
                                 {
-                                    @(((DateTime)val).ToShortDateString())
+                                    @AliaaCommon.PersianDateUtils.GetPersianDateString((DateTime)val, !ShortDates);
                                 }
                                 else
                                 {
-                                    @val
+                                    if (ShortDates)
+                                    {
+                                        @(((DateTime)val).ToShortDateString())
+                                    }
+                                    else
+                                    {
+                                        @val
+                                    }
                                 }
                             }
-                        }
-                        else if (f.PropertyType.IsEnum)
-                        {
-                            @DisplayUtils.DisplayName(f.PropertyType, val.ToString());
-                        }
-                        else
-                        {
-                            @val
-                        }
-                    </td>
-                }
-            </tr>
-            j++;
-        }
-    </tbody>
-</table>
+                            else if (f.PropertyType.IsEnum)
+                            {
+                                @DisplayUtils.DisplayName(f.PropertyType, val.ToString());
+                            }
+                            else
+                            {
+                                @val
+                            }
+                        </td>
+                    }
+                </tr>
+                j++;
+            }
+        </tbody>
+    </table>
+</div>
 
 @code {
 
@@ -116,6 +118,15 @@
             }
         }
     }
+
+    [Parameter]
+    public bool StickyHead { get; set; }
+
+    [Parameter]
+    public int? Height { get; set; }
+
+    [Parameter]
+    public int? Width { get; set; }
 
     [Parameter]
     public IEnumerable<T> Data { get; set; }
@@ -152,7 +163,7 @@
         typeof(string), typeof(int), typeof(long), typeof(float), typeof(double),
         typeof(int?), typeof(long?), typeof(float?), typeof(double?),
         typeof(DateTime), typeof(DateTime?)
-    };
+        };
 
     protected override void OnInitialized()
     {
