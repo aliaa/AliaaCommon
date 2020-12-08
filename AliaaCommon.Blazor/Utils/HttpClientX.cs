@@ -27,6 +27,7 @@ namespace AliaaCommon.Blazor.Utils
             this.nav = nav;
             this.js = js;
             jsonOptions = new JsonSerializerOptions();
+            jsonOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
             jsonOptions.Converters.Add(new JsonStringEnumConverter());
             jsonOptions.Converters.Add(new DictionaryIntConverter());
             jsonOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
