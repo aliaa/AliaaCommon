@@ -113,15 +113,12 @@ namespace AliaaCommon.Blazor.Utils
         private async Task<HttpResponseException> CreateHttpResponseException(HttpResponseMessage resp)
         {
             var content = await resp.Content.ReadAsStringAsync();
-            Dictionary<string, List<string>> errors;
+            Dictionary<string, List<string>> errors = null;
             try
             {
                 errors = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(content, jsonOptions);
             }
-            catch
-            {
-                return new HttpResponseException((int)resp.StatusCode, null, content);
-            }
+            catch { }
             return new HttpResponseException((int)resp.StatusCode, errors, content);
         }
 
