@@ -1,6 +1,6 @@
 ﻿@typeparam T
-<div class="d-flex border rounded pt-3">
-    <ul class="list-unstyled px-3">
+<div class="d-flex border rounded pt-3" style="@(MaxHeight != null ? $"max-height:{MaxHeight}px; overflow:auto;" : "")">
+    <ul class="list-unstyled px-3 @(ColumnsCount != null ? "column-count:" + ColumnsCount : "")">
         @if (Data != null)
         {
             foreach (var item in Data)
@@ -8,9 +8,9 @@
                 var Text = TextField?.Invoke(item);
                 var Value = ValueField?.Invoke(item).ToString();
                 bool Checked = SelectedValues.Contains(Value);
-                <li style="float:right; width:@(ItemWidth)em;">
-                    <label class="d-block">
-                        <input type="checkbox" checked=@Checked @onchange="e => { CheckboxClicked(Value, e.Value); }" />
+                <li style="@(ColumnsCount == null ? $"float:right; width:{ItemWidth}em;" : "")">
+                    <label class="d-block" style="@(Disabled ? "color:#6c757d;" : "")">
+                        <input type="checkbox" checked=@Checked @onchange="e => { CheckboxClicked(Value, e.Value); }" disabled="@Disabled" />
                         @Text
                     </label>
                 </li>
@@ -38,20 +38,25 @@
     public List<string> SelectedValues { get; set; }
 
     [Parameter]
-    public float ItemWidth { get; set; } = 8;
+    public int? ColumnsCount { get; set; }
+
+    [Parameter]
+    public float? ItemWidth { get; set; } = 8;
+
+    [Parameter]
+    public int? MaxHeight { get; set; }
+
+    [Parameter]
+    public bool Disabled { get; set; }
 
     [Parameter]
     public EventCallback<List<string>> ChecksChanged { get; set; }
-
-    protected override void OnInitialized()
-    {
-        ValueField = (i) => i;
-    }
 
     public void CheckboxClicked(string value, object isChecked)
     {
         if ((bool)isChecked)
         {
+            Console.WriteLine(value);
             if (!SelectedValues.Contains(value))
                 SelectedValues.Add(value);
         }

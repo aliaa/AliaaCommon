@@ -1,7 +1,7 @@
 ﻿@using System.Reflection
 @using System.Linq.Expressions;
 
-<label for="@memberName">@displayName @ChildContent</label>
+<label for="@memberName" class="@(FontBold ? "font-weight-bold" : "") @Class">@displayName @ChildContent</label>
 
 @code {
     [Parameter]
@@ -9,6 +9,12 @@
 
     [Parameter]
     public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public bool FontBold { get; set; }
+
+    [Parameter]
+    public string Class { get; set; }
 
     private string displayName;
     private string memberName;
