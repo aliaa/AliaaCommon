@@ -45,6 +45,18 @@ namespace AliaaCommon
             return DisplayName(typeof(T), memberName);
         }
 
+        public static string DisplayName(Expression<Func<object>> member)
+        {
+            MemberInfo memberInfo;
+            if (member.Body is MemberExpression)
+                memberInfo = ((MemberExpression)member.Body).Member;
+            else if (member.Body is UnaryExpression)
+                memberInfo = ((member.Body as UnaryExpression).Operand as MemberExpression).Member;
+            else
+                throw new NotImplementedException();
+            return DisplayName(memberInfo);
+        }
+
         public static string DisplayName<E>(E value) where E : struct, IConvertible
         {
             var fieldInfo = value.GetType().GetField(value.ToString());

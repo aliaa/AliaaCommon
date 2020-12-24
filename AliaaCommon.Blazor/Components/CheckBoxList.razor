@@ -8,9 +8,9 @@
                 var Text = TextField?.Invoke(item);
                 var Value = ValueField?.Invoke(item).ToString();
                 bool Checked = SelectedValues.Contains(Value);
-                <li style="@(ColumnsCount == null ? $"float:right; width:{ItemWidth}em;" : "")">
+                <li class="mb-1" style="@(ColumnsCount == null ? $"float:right; width:{ItemWidth}em;" : "")">
                     <label class="d-block" style="@(Disabled ? "color:#6c757d;" : "")">
-                        <input type="checkbox" checked=@Checked @onchange="e => { CheckboxClicked(Value, e.Value); }" disabled="@Disabled" />
+                        <input type="checkbox" class="form-check-input" checked=@Checked @onchange="e => { CheckboxClicked(Value, e.Value); }" disabled="@Disabled" />
                         @Text
                     </label>
                 </li>

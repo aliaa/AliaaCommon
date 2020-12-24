@@ -1,7 +1,7 @@
 ﻿@using System.Reflection
 @using System.Linq.Expressions;
 
-<label for="@memberName" class="@(FontBold ? "font-weight-bold" : "") @Class">@displayName @ChildContent</label>
+<label for="@memberName" class="form-label @(FontBold ? "font-weight-bold fw-bold" : "") @Class">@displayName @ChildContent</label>
 
 @code {
     [Parameter]
