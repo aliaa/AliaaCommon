@@ -5,6 +5,10 @@
     <table class="table table-striped table-bordered table-sm">
         <thead>
             <tr>
+                @if (ShowIndex)
+                {
+                    <th></th>
+                }
                 @if (LinkColumns != null)
                 {
                     for (int i = 0; i < LinkColumns.Length; i++)
@@ -30,6 +34,10 @@
             @foreach (var item in Data)
             {
                 <tr>
+                    @if (ShowIndex)
+                    {
+                        <td>@(j+1)</td>
+                    }
                     @if (LinkColumns != null)
                     {
                         @foreach (var col in LinkColumns)
@@ -118,6 +126,9 @@
             }
         }
     }
+
+    [Parameter]
+    public bool ShowIndex { get; set; }
 
     [Parameter]
     public bool StickyHead { get; set; }
