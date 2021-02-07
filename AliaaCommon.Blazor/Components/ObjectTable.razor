@@ -1,8 +1,8 @@
 ﻿@typeparam T
 @using MongoDB.Bson.Serialization.Attributes
 
-<div class="@(StickyHead ? "tableFixHead" : "")" style="@(Height.HasValue && StickyHead ? "height: " + Height.Value + "px;" : "") @(Width.HasValue ? "width: " + Width.Value + "px;" : "")">
-    <table class="table table-striped table-bordered table-sm">
+<div class="table-responsive @(StickyHead ? "tableFixHead" : "")" style="@(Height.HasValue && StickyHead ? $"height: {Height.Value}px;" : "") @(Width.HasValue ? $"width: {Width.Value}px;" : "")">
+    <table class="table table-striped table-bordered table-sm" style="@(MinWidth != null ? $"min-width: {MinWidth.Value}px;" : "")">
         <thead>
             <tr>
                 @if (ShowIndex)
@@ -138,6 +138,9 @@
 
     [Parameter]
     public int? Width { get; set; }
+
+    [Parameter]
+    public int? MinWidth { get; set; }
 
     [Parameter]
     public IEnumerable<T> Data { get; set; }

@@ -165,5 +165,25 @@ namespace AliaaCommon.Blazor.Utils
                 throw await CreateHttpResponseException(resp);
             return await resp.Content.ReadFromJsonAsync<Res>(jsonOptions);
         }
+
+        public async new Task DeleteAsync(string requestUri, CancellationToken cancellationToken = default)
+        {
+            HttpResponseMessage resp;
+            try
+            {
+                resp = await base.DeleteAsync(requestUri, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Errr on POST 2", ex);
+            }
+
+            if (resp.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                nav.NavigateTo(loginUri);
+            }
+            else if ((int)resp.StatusCode >= 400)
+                throw await CreateHttpResponseException(resp);
+        }
     }
 }
