@@ -80,7 +80,7 @@ namespace AliaaCommon.Blazor.Utils
             return resp;
         }
 
-        public async Task<Res> PostAsJsonAsync<Req, Res>(string requestUri, Req value, CancellationToken cancellationToken = default)
+        public async Task<Res> PostAsJsonAsync<Req, Res>(string requestUri, Req value, bool navigateToLoginWhenUnauthorized = true, CancellationToken cancellationToken = default)
         {
             JsonContent content = JsonContent.Create(value, mediaType: null, jsonOptions);
             HttpResponseMessage resp;
@@ -93,7 +93,7 @@ namespace AliaaCommon.Blazor.Utils
                 throw new Exception("Errr on POST 2", ex);
             }
 
-            if (resp.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            if (navigateToLoginWhenUnauthorized && resp.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
                 nav.NavigateTo(loginUri);
                 return default;
