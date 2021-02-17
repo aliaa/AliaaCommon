@@ -1,5 +1,6 @@
 ﻿@typeparam T
 @using MongoDB.Bson.Serialization.Attributes
+@inject NavigationManager nav
 
 <div class="table-responsive @(StickyHead ? "tableFixHead" : "")" style="@(Height.HasValue && StickyHead ? $"height: {Height.Value}px;" : "") @(Width.HasValue ? $"width: {Width.Value}px;" : "")">
     <table class="table table-striped table-bordered table-sm" style="@(MinWidth != null ? $"min-width: {MinWidth.Value}px;" : "")">
@@ -42,8 +43,11 @@
                     {
                         @foreach (var col in LinkColumns)
                         {
+                            var url = col.Link.Replace("{" + col.KeyFieldName + "}", col.KeyField.GetValue(item).ToString());
                             <td>
-                                <a href="@(col.Link.Replace("{" + col.KeyFieldName + "}", col.KeyField.GetValue(item).ToString()))">@col.Text</a>
+                                <a href="@url" @onclick="() => HandleLinkClick(url)">
+                                    @col.Text
+                                </a>
                             </td>
                         }
                     }
@@ -217,5 +221,10 @@
     private async Task HandleActionClick(string col, T item)
     {
         await OnActionClick.InvokeAsync(new KeyValuePair<string, T>(col, item));
+    }
+
+    private void HandleLinkClick(string url)
+    {
+        nav.NavigateTo(url, forceLoad: true);
     }
 }

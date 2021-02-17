@@ -1,7 +1,7 @@
 ﻿@using System.Reflection
-@using System.Linq.Expressions;
+@using System.Linq.Expressions
 
-<label for="@memberName" class="form-label @(FontBold ? "font-weight-bold fw-bold" : "") @Class">@displayName @ChildContent</label>
+<label for="@memberName" class="@Classes">@displayName @ChildContent</label>
 
 @code {
     [Parameter]
@@ -19,13 +19,24 @@
     private string displayName;
     private string memberName;
 
+    private string Classes
+    {
+        get
+        {
+            string res = "form-label " + Class;
+            if (FontBold)
+                res += " font-weight-bold fw-bold";
+            return res;
+        }
+    }
+
     protected override void OnInitialized()
     {
         MemberInfo memberInfo;
-        if (For.Body is MemberExpression)
-            memberInfo = ((MemberExpression)For.Body).Member;
-        else if (For.Body is UnaryExpression)
-            memberInfo = ((For.Body as UnaryExpression).Operand as MemberExpression).Member;
+        if (For.Body is MemberExpression mex)
+            memberInfo = mex.Member;
+        else if (For.Body is UnaryExpression uex)
+            memberInfo = (uex.Operand as MemberExpression).Member;
         else
             throw new NotImplementedException();
         memberName = memberInfo.Name;
